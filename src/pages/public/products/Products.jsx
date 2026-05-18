@@ -185,7 +185,7 @@ export default function Products() {
               {filtered.length === 0 ? (
                 <EmptyState />
               ) : (
-                <div className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 lg:gap-4">
+                <div className="grid grid-cols-1 min-[350px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 lg:gap-4">
                   {filtered.map((p) => (
                     <ProductCard key={p.id} product={p} />
                   ))}
