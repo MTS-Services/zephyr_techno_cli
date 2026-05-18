@@ -41,7 +41,7 @@ const MobileBottomNav = () => {
   };
 
   return (
-    <nav className="sm:hidden fixed left-4 right-4 bottom-4 z-30">
+    <nav className="sm:hidden fixed w-full bottom-0 z-30">
       <div className="rounded-lg bg-white border border-slate-200 border-t-custom shadow-xl shadow-custom/5">
         <ul className="flex items-center justify-between px-3 py-2">
           {items.map((it) => {
@@ -49,9 +49,9 @@ const MobileBottomNav = () => {
             const active = isActive(it);
             return (
               <li key={it.to} className="w-1/5">
-                <Link to={it.to} className={`flex flex-col items-center gap-1 text-xs ${active ? 'nav-link-active text-custom' : 'text-slate-700 hover:text-custom'}`}>
-                  <div className="p-2 rounded-md bg-transparent">
-                    <Icon size={20} />
+                <Link to={it.to} className={`flex py-2 flex-col items-center gap-1 text-sm font-semibold ${active ? 'nav-link-active text-custom' : 'text-slate-700 hover:text-custom'}`}>
+                  <div className="p-1 rounded-md bg-transparent">
+                    <Icon size={23} />
                   </div>
                   <span className="text-[10px] tracking-wide">{it.label}</span>
                 </Link>
