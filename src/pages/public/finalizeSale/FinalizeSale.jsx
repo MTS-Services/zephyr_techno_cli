@@ -34,7 +34,7 @@ const FinalizeSale = () => {
                 Device Details
               </span>
             </div>
-            <div className="w-8 sm:w-12 h-[1px] bg-[#006878] mx-1 sm:mx-2"></div>
+            <div className="w-8 sm:w-12 h-px bg-[#006878] mx-1 sm:mx-2"></div>
             {/* Step 2 */}
             <div className="flex items-center gap-2 opacity-80">
               <div className="w-8 h-8 rounded-full bg-[#006878] text-white flex items-center justify-center text-sm font-bold">
@@ -44,23 +44,25 @@ const FinalizeSale = () => {
                 Condition
               </span>
             </div>
-            <div className="w-8 sm:w-12 h-[1px] bg-[#006878] mx-1 sm:mx-2"></div>
+            <div className="w-8 sm:w-12 h-px bg-[#006878] mx-1 sm:mx-2"></div>
             {/* Step 3 */}
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-[#006878] text-white flex items-center justify-center text-sm font-bold">
                 3
               </div>
-              <span className="text-[#171C1E] text-sm font-semibold">Summary</span>
+              <span className="text-[#171C1E] text-sm font-semibold">
+                Summary
+              </span>
             </div>
           </div>
         </div>
 
         {/* Header Content */}
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[#171C1E] mb-4 leading-tight">
+          <h1 className="text-3xl md:text-5xl lg:text-[56px] font-bold text-[#171C1E] mb-6 leading-tight">
             Finalize Your Sale
           </h1>
-          <p className="text-[#3D494C] text-sm md:text-base">
+          <p className="text-[#3D494C] text-base md:text-lg">
             Complete your details to secure your trade-in price of £445.00.
           </p>
         </div>
@@ -69,10 +71,10 @@ const FinalizeSale = () => {
           <form onSubmit={handleSubmit} className="space-y-12">
             {/* Your Details */}
             <div className="space-y-6">
-              <h2 className="text-lg sm:text-xl font-medium text-[#171C1E]">
+              <h2 className="text-xl sm:text-2xl font-medium text-[#171C1E]">
                 Your Details
               </h2>
-              
+
               <div className="space-y-6">
                 <div>
                   <label className="block text-sm text-[#6D797C] mb-2">
@@ -84,7 +86,7 @@ const FinalizeSale = () => {
                     value={formData.fullName}
                     onChange={handleInputChange}
                     placeholder="e.g. James Wilson"
-                    className="w-full bg-white border border-[#BDC9CC] rounded-lg py-3 px-4 text-sm text-[#171C1E] outline-none focus:border-custom focus:ring-1 focus:ring-custom transition-all"
+                    className="w-full bg-white border border-[#BDC9CC] rounded-lg py-4 px-5 text-[#171C1E] outline-none focus:border-custom focus:ring-1 focus:ring-custom transition-all"
                   />
                 </div>
 
@@ -99,7 +101,7 @@ const FinalizeSale = () => {
                       value={formData.email}
                       onChange={handleInputChange}
                       placeholder="james@example.com"
-                      className="w-full bg-white border border-[#BDC9CC] rounded-lg py-3 px-4 text-sm text-[#171C1E] outline-none focus:border-custom focus:ring-1 focus:ring-custom transition-all"
+                      className="w-full bg-white border border-[#BDC9CC] rounded-lg py-4 px-5 text-[#171C1E] outline-none focus:border-custom focus:ring-1 focus:ring-custom transition-all"
                     />
                   </div>
                   <div>
@@ -112,7 +114,7 @@ const FinalizeSale = () => {
                       value={formData.phone}
                       onChange={handleInputChange}
                       placeholder="07123 456789"
-                      className="w-full bg-white border border-[#BDC9CC] rounded-lg py-3 px-4 text-sm text-[#171C1E] outline-none focus:border-custom focus:ring-1 focus:ring-custom transition-all"
+                      className="w-full bg-white border border-[#BDC9CC] rounded-lg py-4 px-5 text-[#171C1E] outline-none focus:border-custom focus:ring-1 focus:ring-custom transition-all"
                     />
                   </div>
                 </div>
@@ -123,13 +125,16 @@ const FinalizeSale = () => {
             <div className="space-y-6">
               <div className="flex items-center gap-3">
                 <Truck className="w-6 h-6 text-custom" />
-                <h2 className="text-lg sm:text-xl font-bold text-[#171C1E]">
+                <h2 className="text-xl sm:text-2xl font-bold text-[#171C1E]">
                   Handover Method
                 </h2>
               </div>
 
-              <div className="w-full bg-white border border-[#BDC9CC] rounded-xl p-6 sm:p-8 flex flex-col items-center justify-center cursor-default hover:border-custom hover:shadow-sm transition-all duration-300">
-                <Package className="w-10 h-10 text-gray-500 mb-4" strokeWidth={1.5} />
+              <div className="w-full bg-white border border-[#BDC9CC] rounded-xl p-8 sm:p-12 flex flex-col items-center justify-center cursor-default hover:border-custom hover:shadow-sm transition-all duration-300">
+                <Package
+                  className="w-10 h-10 text-gray-500 mb-4"
+                  strokeWidth={1.5}
+                />
                 <h3 className="text-base font-bold text-[#171C1E] mb-2">
                   Send via Courier
                 </h3>
@@ -143,12 +148,13 @@ const FinalizeSale = () => {
             <div className="pt-4">
               <button
                 type="submit"
-                className="w-full bg-custom text-white text-base font-semibold py-3 px-6 rounded-lg hover:brightness-110 transition-all duration-300 shadow-md mb-4 cursor-pointer"
+                className="w-full bg-custom text-white text-lg font-semibold py-4 px-8 rounded-lg hover:brightness-110 transition-all duration-300 shadow-md mb-4 cursor-pointer"
               >
                 Submit Request
               </button>
               <p className="text-center text-[#6D797C] text-xs">
-                By clicking confirm, you agree to our Terms of Sale and Privacy Policy.
+                By clicking confirm, you agree to our Terms of Sale and Privacy
+                Policy.
               </p>
             </div>
           </form>

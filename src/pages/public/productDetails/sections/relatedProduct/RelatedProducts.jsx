@@ -1,14 +1,27 @@
-import React, { use, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Card from '../../../home/sections/featured/components/Card';
 
-const allfeatured = fetch("/data/featured.json").then((res) => res.json());
-
 const RelatedProducts = () => {
-    const data = use(allfeatured);
+    const [data, setData] = useState([]);
     const scrollContainerRef = useRef(null);
     const [showLeftArrow, setShowLeftArrow] = useState(false);
     const [showRightArrow, setShowRightArrow] = useState(true);
+
+    useEffect(() => {
+        let mounted = true;
+
+        fetch('/data/featured.json')
+            .then((res) => res.json())
+            .then((json) => {
+                if (mounted) setData(json);
+            })
+            .catch((err) => console.error('Failed to load featured.json', err));
+
+        return () => {
+            mounted = false;
+        };
+    }, []);
 
     const handleScroll = () => {
         const container = scrollContainerRef.current;
@@ -31,7 +44,7 @@ const RelatedProducts = () => {
         }
     };
 
-    React.useEffect(() => {
+    useEffect(() => {
         handleScroll();
         const container = scrollContainerRef.current;
         container?.addEventListener('scroll', handleScroll);
