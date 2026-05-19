@@ -12,7 +12,6 @@ const Home = () => {
   return (
     <>
       
-     
         <section>
           <Hero/>
           <Category/>
@@ -23,8 +22,7 @@ const Home = () => {
         <Promotion/>
         <Highlights />
         <Review/>
-        <Cta/>
-        
+        <Cta/> 
       
     </>
   );

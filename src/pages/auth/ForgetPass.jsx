@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
+import { FaArrowLeft } from 'react-icons/fa';
 import leftsideImage from '../../assets/auth/forgetpass.jpg';
+import { GoArrowLeft } from 'react-icons/go';
 
 const ForgetPass = () => {
     const [email, setEmail] = useState('');
@@ -23,7 +25,7 @@ const ForgetPass = () => {
     };
 
     return (
-        <div className="flex h-screen w-full overflow-hidden">
+        <div className="relative flex h-screen w-full overflow-hidden">
             {/* Left - Image */}
             <div className="hidden md:block w-1/2 h-full overflow-hidden">
                 <img
@@ -31,6 +33,19 @@ const ForgetPass = () => {
                     className="w-full h-full ken-burns-image object-cover"
                     alt="Forget Password"
                 />
+            </div>
+
+            {/* Top-right Back Button */}
+            <div className="absolute top-4 right-4 z-50">
+                <button
+                                    onClick={() => navigate('/login')}
+                                    aria-label="Back to Login"
+                                    className="flex items-center gap-0.5 duration-300 px-3 py-2 transition cursor-pointer hover:scale-105"
+                                >
+                                    
+                                    <GoArrowLeft className="w-4 h-4 text-gray-500"/>
+                                    <span className="text-xs text-gray-500">Back</span>
+                                </button>
             </div>
 
             {/* Right - Form */}

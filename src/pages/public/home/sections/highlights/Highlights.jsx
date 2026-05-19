@@ -38,13 +38,13 @@ export default function Highlights() {
   return (
     <section className="bg-white py-10 lg:py-16">
       <Container>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-6">
         {features.map((f) => (
           <div
             key={f.id}
             className="card border border-[#EBECF0] bg-white rounded-2xl p-8
               transition-all duration-300 ease-out
-              hover:-translate-y-1 hover:shadow-md cursor-default"
+              hover:scale-105 hover:border-custom cursor-default"
           >
             <div className="text-custom text-2xl mb-4">{f.icon}</div>
             <h3 className="text-base font-semibold text-[#171C1E] mb-2">{f.title}</h3>

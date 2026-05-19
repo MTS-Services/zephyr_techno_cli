@@ -10,7 +10,7 @@ const reviews = [
     {
         id: 1,
         stars: 5,
-        text: "I recently bought a smartphone from this website, and the experience was excellent. The delivery was fast, the product was genuine, and the price was better than local stores. Highly recommended!",
+        text: "I recently bought a smartphone from this website, and the experience was excellent. The delivery was fast, the product was genuine, and the price was better than local stores.",
         author: "Sabo Masties",
     },
     {
@@ -90,7 +90,7 @@ const Review = () => {
                                             p-6 rounded-xl border transition-all duration-500
                                             ${isActive
                                                 ? 'bg-white shadow-lg border-gray-200 scale-110 z-10'
-                                                : 'bg-white border-gray-100 shadow-sm scale-95 opacity-80 h-[220px]'
+                                                : 'bg-white border-gray-100 shadow-sm scale-95 opacity-80 h-55'
                                             }
                                         `}
                                     >

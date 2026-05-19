@@ -3,12 +3,16 @@ import { useState } from 'react';
 import leftsideImage from '../../assets/auth/register.webp';
 import { VscEye, VscEyeClosed } from 'react-icons/vsc';
 import KamuiImage from '../../components/shared/KamuiImage';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
+import { FaArrowLeft } from 'react-icons/fa';
+import { GoArrowLeft } from 'react-icons/go';
 
 const Register = () => {
     const [showPassword, setShowPassword] = useState(false);
+    const navigate = useNavigate();
+
     return (
-        <div className="flex h-screen w-full overflow-hidden">
+        <div className="relative flex h-screen w-full overflow-hidden">
             {/* Left - Image */}
             <div className="hidden md:block w-1/2 h-full overflow-hidden">
                 <img
@@ -17,6 +21,19 @@ const Register = () => {
                     alt="Register"
                 />
                 {/* <KamuiImage src={leftsideImage} alt="Register"/> */}
+            </div>
+
+            {/* Top-right Back Button */}
+            <div className="absolute top-4 right-4 z-50">
+                <button
+                                    onClick={() => navigate('/')}
+                                    aria-label="Back to Home"
+                                    className="flex items-center gap-0.5 duration-300 px-3 py-2 transition cursor-pointer hover:scale-105"
+                                >
+                                    
+                                    <GoArrowLeft className="w-4 h-4 text-gray-500"/>
+                                    <span className="text-xs text-gray-500">Home</span>
+                                </button>
             </div>
 
             {/* Right - Form */}
