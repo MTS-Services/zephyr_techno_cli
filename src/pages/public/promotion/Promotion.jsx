@@ -1,4 +1,5 @@
 import promotion from '../../../assets/banner/promotions.webp';
+import mobileBanner from '../../../assets/banner/newone.webp';
 import { Link } from 'react-router';
 import Container from '../../../layout/Container';
 
@@ -6,27 +7,15 @@ const Promotion = () => {
     return (
         <div className='py-10 md:pb-16'>
           <Container>
-            {/* Mobile stacked card */}
-            <div className="sm:hidden">
-              <div className="overflow-hidden rounded-xl shadow-lg bg-white">
-                <img src={promotion} alt="Promotion" className="w-full h-52 object-cover object-top rounded-t-xl" />
-                <div className="p-4 bg-[#101216] text-white">
-                  <h2 className="text-2xl font-extrabold leading-tight">
-                    Sell Your Phone
-                    <span className="block mt-1 text-custom">In Minutes</span>
-                  </h2>
-                  <p className="mt-3 text-sm text-slate-200 leading-relaxed">
-                    Tired of your old device? Trading it in has never been easier. We offer the best market rates and a seamless process.
-                  </p>
-                  <Link to="/sell" className="mt-4 block w-full text-center rounded-lg bg-custom px-4 py-2.5 text-sm font-semibold text-white hover:brightness-110 transition">
-                    Sell Now
-                  </Link>
-                </div>
+            {/* Mobile -> up to lg (0 - 1024px): show only the image (no text/buttons) */}
+            <div className="lg:hidden">
+              <div className="overflow-hidden rounded-xl">
+                <img src={mobileBanner} alt="Promotion" className="w-full h-auto object-cover rounded-xl" />
               </div>
             </div>
 
-            {/* Desktop / tablet layout (kept as before) */}
-            <div className='hidden sm:block relative h-75 sm:h-95 lg:h-95 overflow-hidden rounded-xl'>
+            {/* Desktop (1024px+) layout */}
+            <div className='hidden lg:block relative h-75 lg:h-95 overflow-hidden rounded-xl'>
               <img
                 src={promotion}
                 alt="Promotion"

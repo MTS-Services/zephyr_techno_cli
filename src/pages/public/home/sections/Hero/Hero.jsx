@@ -1,5 +1,5 @@
 import banner from '../../../../../../src/assets/banner/hero.webp'
-import mobileBanner from '../../../../../../src/assets/banner/hero.webp'
+import mobileBanner from '../../../../../../src/assets/banner/mobilebanner.webp'
 import { Link } from 'react-router';
 import Container from '../../../../../layout/Container';
 
@@ -9,45 +9,12 @@ const Hero = () => {
             <Container>
                 <div className='overflow-hidden rounded-2xl'>
                     <div className='sm:hidden'>
-                        <div className='rounded-2xl border border-[#2a3a5f] bg-[#14192b]  shadow-[0_24px_60px_rgba(7,12,24,0.35)]'>
-                            <div className='rounded-[18px] border border-cyan-400/35 bg-[radial-gradient(circle_at_top,rgba(61,180,204,0.14),rgba(12,17,29,0.96)_58%)] p-4 text-white'>
-                                <span className='inline-flex rounded-full border border-white/15 bg-white/8 px-3 py-1 text-[11px] font-medium text-slate-200'>
-                                    1-2 Years Manufacturer Warranty
-                                </span>
-
-                                <h1 className='mt-3 text-[1.55rem] font-semibold leading-tight tracking-tight'>
-                                    Buy New & Used
-                                    <span className='block text-custom'>Smartphones</span>
-                                    <span className='block'>at the Best Prices</span>
-                                </h1>
-
-                                <p className='mt-3 max-w-[28ch] text-sm leading-6 text-slate-200/90'>
-                                    Shop premium phones with trusted quality and fast delivery. We offer a wide range of devices from top brands at unbeatable prices.
-                                </p>
-
-                                <div className='mt-4 flex gap-3'>
-                                    <Link
-                                        to='/products'
-                                        className='inline-flex flex-1 items-center justify-center rounded-lg bg-custom px-4 py-2.5 text-sm font-medium text-white transition-transform duration-300 hover:scale-[1.02]'
-                                    >
-                                        Shop Now
-                                    </Link>
-                                    <Link
-                                        to='/sell'
-                                        className='inline-flex flex-1 items-center justify-center rounded-lg border border-white/45 bg-transparent px-4 py-2.5 text-sm font-medium text-white transition-transform duration-300 hover:scale-[1.02] hover:bg-white/6'
-                                    >
-                                        Sell Your Phone
-                                    </Link>
-                                </div>
-
-                                <div className='mt-4 overflow-hidden rounded-2xl border border-white/10 bg-black/20'>
-                                    <img
-                                        src={mobileBanner}
-                                        className='h-44 w-full object-cover object-right'
-                                        alt='Mobile hero banner'
-                                    />
-                                </div>
-                            </div>
+                        <div className='overflow-hidden rounded-2xl'>
+                            <img
+                                src={mobileBanner}
+                                className='w-full h-auto object-cover'
+                                alt='Mobile hero banner'
+                            />
                         </div>
                     </div>
 
