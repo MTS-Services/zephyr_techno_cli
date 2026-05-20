@@ -1,18 +1,14 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router';
 import { Home, Grid, ShoppingCart, User, MapPin } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const cities = ['Dhaka', 'Chittagong', 'Sylhet', 'Khulna', 'Barisal', 'Rangpur'];
 
 const MobileBottomNav = () => {
-  const isLoggedIn = Boolean(
-    localStorage.getItem('user') ||
-      localStorage.getItem('token') ||
-      localStorage.getItem('accessToken') ||
-      localStorage.getItem('auth')
-  );
+  const { isAuthenticated } = useAuth();
 
-  const profilePath = isLoggedIn ? '/dashboard/user' : '/login';
+  const profilePath = isAuthenticated ? '/dashboard/user' : '/login';
   const randomCity = cities[Math.floor(Math.random() * cities.length)];
   const locationPath = `/products?location=${encodeURIComponent(randomCity)}`;
 

@@ -1,23 +1,46 @@
 // src/pages/Login.jsx
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
-import { FaArrowLeft } from 'react-icons/fa';
 import leftImage from '../../assets/auth/login.jpg';
 import { getRoles } from '../../utils/roles';
 import { GoArrowLeft } from 'react-icons/go';
-import { BsArrowLeft } from 'react-icons/bs';
+import { VscEye, VscEyeClosed } from 'react-icons/vsc';
+import { useAuth } from '../../context/AuthContext';
 
 const Login = () => {
     const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [error, setError] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const navigate = useNavigate();
+    const { login } = useAuth();
 
-    const handleLogin = (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
-        const lower = email.toLowerCase();
-        if (lower.includes('admin')) {
-            navigate(getRoles('admin'));
-        } else if (lower.includes('user')) {
-            navigate(getRoles('user'));
+        setError('');
+
+        if (!email || !password) {
+            setError('Email and password are required.');
+            return;
+        }
+
+        setIsSubmitting(true);
+
+        try {
+            const authData = await login({ email, password });
+            const redirectPath = getRoles(authData.role);
+
+            if (redirectPath === '/login') {
+                setError('Your account role is not authorized for a dashboard.');
+                return;
+            }
+
+            navigate(redirectPath, { replace: true });
+        } catch (err) {
+            setError(err.message || 'Unable to login right now. Please try again.');
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -75,12 +98,28 @@ const Login = () => {
                             <label className="block text-sm md:text-base font-medium text-gray-700 mb-1">
                                 Password
                             </label>
-                            <input
-                                type="password"
-                                placeholder="Enter your password here..."
-                                className="input w-full bg-[#ebecf0] border-none focus:outline-none"
-                            />
+                            <div className="relative">
+                                <input
+                                    type={showPassword ? 'text' : 'password'}
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    placeholder="Enter your password here..."
+                                    className="input w-full bg-[#ebecf0] border-none pr-10 focus:outline-none"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword((prev) => !prev)}
+                                    className="absolute cursor-pointer right-2 top-1/2 transform -translate-y-1/2 text-gray-500"
+                                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                                >
+                                    {showPassword ? <VscEyeClosed /> : <VscEye />}
+                                </button>
+                            </div>
                         </div>
+
+                        {error ? (
+                            <p className="mb-3 text-sm font-medium text-red-500">{error}</p>
+                        ) : null}
 
                         {/* Forgot Password */}
                         <div className="text-right mb-5">
@@ -90,8 +129,12 @@ const Login = () => {
                         </div>
 
                         {/* Sign In Button */}
-                        <button type="submit" className="btn-custom w-full text-base font-semibold">
-                            Sign In
+                        <button
+                            type="submit"
+                            disabled={isSubmitting}
+                            className="btn-custom w-full text-base font-semibold disabled:cursor-not-allowed disabled:opacity-70"
+                        >
+                            {isSubmitting ? 'Signing In...' : 'Sign In'}
                         </button>
                     </form>
 

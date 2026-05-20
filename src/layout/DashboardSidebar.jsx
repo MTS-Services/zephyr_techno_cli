@@ -12,6 +12,7 @@ import {
     LogOut,
 } from 'lucide-react';
 import logo from '../assets/logo.webp';
+import { useAuth } from '../context/AuthContext';
 
 const ADMIN_NAV_ITEMS = [
     { label: 'Overview', icon: LayoutDashboard, path: '/dashboard/admin', end: true },
@@ -68,8 +69,10 @@ const DashboardSidebar = ({ role, isOpen, onClose }) => {
     const navItems = role === 'admin' ? ADMIN_NAV_ITEMS : USER_NAV_ITEMS;
     const { pathname } = useLocation();
     const navigate = useNavigate();
+    const { logout } = useAuth();
 
     const handleLogout = () => {
+        logout();
         onClose?.();
         navigate('/login');
     };
