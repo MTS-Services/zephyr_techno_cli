@@ -140,6 +140,23 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('user');
   };
 
+  const updateUser = (nextUser) => {
+    setAuth((current) => {
+      const updatedUser = typeof nextUser === 'function' ? nextUser(current.user) : nextUser;
+      const nextAuth = {
+        ...current,
+        user: updatedUser,
+      };
+
+      localStorage.setItem('auth', JSON.stringify(nextAuth));
+      if (updatedUser) {
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+      }
+
+      return nextAuth;
+    });
+  };
+
   const value = useMemo(
     () => ({
       user: auth.user,
@@ -149,6 +166,7 @@ export const AuthProvider = ({ children }) => {
       login,
       register,
       verifyEmail,
+      updateUser,
       logout,
     }),
     [auth.user, auth.token, auth.role]

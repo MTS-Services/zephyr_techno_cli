@@ -50,25 +50,25 @@ const UserOrders = () => {
     };
 
     return (
-        <div className="w-full">
+        <div className="w-full space-y-4 sm:space-y-5">
             {orders.map((order, i) => (
                 <div
                     key={i}
-                    className="flex gap-5 bg-white border-b border-gray-200 py-6 px-4"
+                    className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:flex-row sm:gap-5 sm:py-6 sm:px-4"
                 >
                     <img
                         src={order.image}
                         alt={order.title}
-                        className="w-52 h-40 object-cover rounded-md shrink-0"
+                        className="h-48 w-full rounded-md object-cover sm:h-40 sm:w-52 shrink-0"
                     />
                     <div className="flex flex-col justify-center">
                         <p className="text-xs text-gray-400 mb-1">Order ID: {order.id}</p>
-                        <h2 className="text-lg font-bold text-gray-900 mb-1">{order.title}</h2>
-                        <p className="text-sm text-gray-500 mb-3 line-clamp-2">{order.description}</p>
-                        <p className="text-xl font-bold text-gray-900 mb-3">{order.price}</p>
+                        <h2 className="text-base font-bold text-gray-900 mb-1 sm:text-lg">{order.title}</h2>
+                        <p className="text-sm text-gray-500 mb-3 line-clamp-3 sm:line-clamp-2">{order.description}</p>
+                        <p className="text-lg font-bold text-gray-900 mb-3 sm:text-xl">{order.price}</p>
                         <button
                             onClick={() => openCancelModal(order)}
-                            className="bg-red-600 hover:bg-red-700 text-white text-sm font-semibold px-4 py-2 rounded-md w-fit transition-colors"
+                            className="bg-red-600 hover:bg-red-700 text-white text-sm font-semibold px-4 py-2 rounded-md w-full sm:w-fit transition-colors"
                         >
                             Cancel Order
                         </button>

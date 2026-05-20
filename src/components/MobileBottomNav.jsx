@@ -1,23 +1,19 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router';
-import { Home, Grid, ShoppingCart, User, MapPin } from 'lucide-react';
+import { Home, Grid, ShoppingCart, User, Smartphone } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-
-const cities = ['Dhaka', 'Chittagong', 'Sylhet', 'Khulna', 'Barisal', 'Rangpur'];
 
 const MobileBottomNav = () => {
   const { isAuthenticated } = useAuth();
 
   const profilePath = isAuthenticated ? '/dashboard/user' : '/login';
-  const randomCity = cities[Math.floor(Math.random() * cities.length)];
-  const locationPath = `/products?location=${encodeURIComponent(randomCity)}`;
 
   const items = [
     { to: '/', label: 'Home', icon: Home },
     { to: '/products', label: 'Products', icon: Grid },
     { to: '/cart', label: 'Cart', icon: ShoppingCart },
     { to: profilePath, label: 'Profile', icon: User },
-    { to: locationPath, label: 'Location', icon: MapPin },
+    { to: '/sell', label: 'Sell', icon: Smartphone },
   ];
   const { pathname, search } = useLocation();
 
@@ -25,11 +21,9 @@ const MobileBottomNav = () => {
     // Home
     if (it.to === '/') return pathname === '/';
 
-    // Products vs Location: location item contains a query
-    if (it.to.startsWith('/products')) {
-      if (it.to.includes('?')) {
-        return search.includes('location=');
-      }
+    if (it.to === '/sell') return pathname === '/sell';
+
+    if (it.to === '/products') {
       return pathname === '/products' && !search.includes('location=');
     }
 
