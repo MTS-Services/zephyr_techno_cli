@@ -48,6 +48,9 @@ const Footer = () => {
               <Link to="/about-us" className="text-[#6A6A6A] text-base hover:underline text-left">About</Link>
               <Link to="/for-businesses" className="text-[#6A6A6A] text-base hover:underline text-left">For Businesses</Link>
               <Link to="/contact" className="text-[#6A6A6A] text-base hover:underline text-left">Contact</Link>
+              <Link to="/privacy-policy" className="text-[#6A6A6A] text-base hover:underline text-left">Privacy Policy</Link>
+              <Link to="/terms-and-conditions" className="text-[#6A6A6A] text-base hover:underline text-left">Terms and conditions</Link>
+              <Link to="/refund-policy" className="text-[#6A6A6A] text-base hover:underline text-left">Refund Policy</Link>
             </div>
           </div>
 

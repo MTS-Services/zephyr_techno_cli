@@ -35,6 +35,7 @@ import FinalizeSale from "../pages/public/finalizeSale/FinalizeSale";
 import Checkout from "../pages/public/checkout/Checkout";
 import BusinessQuery from "../pages/admin/businessQuery/BusinessQuery";
 import ForgetCode from "../pages/auth/ForgetCode";
+import Privacy from "../pages/public/privacy-policy/Privacy";
 
 const router = createBrowserRouter([
   {
@@ -68,6 +69,10 @@ const router = createBrowserRouter([
       {
         path: "contact",
         element: <Contact />,
+      },
+      {
+        path: "privacy-policy",
+        element: <Privacy />,
       },
       {
         path: "for-businesses",
@@ -135,6 +140,8 @@ const router = createBrowserRouter([
     path: "*",
     element: <NotFound />,
   },
+
+  
 ]);
 
 export default router;
