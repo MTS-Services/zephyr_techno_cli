@@ -1,212 +1,388 @@
-import React, { useState } from 'react';
+﻿import { useState, useEffect, useCallback } from 'react';
+import Swal from 'sweetalert2';
 import AdminDashboardTitle from '../../../components/dashboards/AdminDashboardTitle';
-import ViewDetailsModal from './components/ViewDetailsModal';
+
+const API_BASE_URL = import.meta.env.VITE_BASE_URL || 'https://api-zephyr-techno.maktechgroup.tech';
+
+const STATUS_STYLES = {
+    NEW: 'bg-blue-100 text-blue-800',
+    CONTRACTED: 'bg-purple-100 text-purple-800',
+};
+
+const STATUS_LABEL = {
+    NEW: 'New',
+    CONTRACTED: 'Contracted',
+};
 
 const CellPhoneMange = () => {
+    const [sellRequests, setSellRequests] = useState([]);
+    const [meta, setMeta] = useState({ total: 0, page: 1, limit: 20, hasNext: false, hasPrevious: false });
+    const [page, setPage] = useState(1);
+    const [loading, setLoading] = useState(false);
     const [openActionMenu, setOpenActionMenu] = useState(null);
-    const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
-    const [selectedPhoneIndex, setSelectedPhoneIndex] = useState(null);
+    const [menuPos, setMenuPos] = useState({ top: 0, right: 0 });
+    const [selectedRequest, setSelectedRequest] = useState(null);
 
-    const [phonesData, setPhonесData] = useState([
-        {
-            id: '#PHO-001',
-            customer: 'Darlene Robertson',
-            phoneNumber: 'iPhone 15 Pro Max',
-            email: '150,000',
-            date: '2024-03-24',
-            status: 'Contracted',
-        },
-        {
-            id: '#PHO-002',
-            customer: 'Cameron Williamson',
-            phoneNumber: 'Samsung Galaxy S24 Ultra',
-            email: '190,000',
-            date: '2024-03-24',
-            status: 'New',
-        },
-        {
-            id: '#PHO-003',
-            customer: 'Darlene Robertson',
-            phoneNumber: 'iPhone 15 Pro Max',
-            email: '150,000',
-            date: '2024-03-24',
-            status: 'Contracted',
-        },
-        {
-            id: '#PHO-004',
-            customer: 'Cameron Williamson',
-            phoneNumber: 'Samsung Galaxy S24 Ultra',
-            email: '190,000',
-            date: '2024-03-24',
-            status: 'New',
-        },
-        {
-            id: '#PHO-005',
-            customer: 'Cameron Williamson',
-            phoneNumber: 'Samsung Galaxy S24 Ultra',
-            email: '190,000',
-            date: '2024-03-24',
-            status: 'New',
-        },
-        {
-            id: '#PHO-006',
-            customer: 'Cameron Williamson',
-            phoneNumber: 'Samsung Galaxy S24 Ultra',
-            email: '190,000',
-            date: '2024-03-24',
-            status: 'New',
-        },
-        {
-            id: '#PHO-007',
-            customer: 'Cameron Williamson',
-            phoneNumber: 'Samsung Galaxy S24 Ultra',
-            email: '190,000',
-            date: '2024-03-24',
-            status: 'New',
-        },
-        {
-            id: '#PHO-008',
-            customer: 'Cameron Williamson',
-            phoneNumber: 'Samsung Galaxy S24 Ultra',
-            email: '190,000',
-            date: '2024-03-24',
-            status: 'New',
-        },
-    ]);
+    const fetchSellRequests = useCallback(async (currentPage) => {
+        setLoading(true);
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${API_BASE_URL}/api/admin/sell-requests?page=${currentPage}&limit=20`, {
+                headers: token ? { Authorization: `Bearer ${token}` } : {},
+            });
 
-    const statusOptions = ['Contracted', 'New'];
-    const phoneDetailImage = 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-15-pro-max-naturaltitanium-select?wid=470&hei=556&fmt=png&qlt=95&.v=1692923777972';
-    const selectedPhone = selectedPhoneIndex !== null ? phonesData[selectedPhoneIndex] : null;
+            let payload = {};
+            try { payload = await res.json(); } catch { /* empty */ }
 
-    const getStatusColor = (status) => {
-        const colors = {
-            'Contracted': 'bg-purple-100 text-purple-800',
-            'New': 'bg-blue-100 text-blue-800',
-        };
-        return colors[status] || 'bg-gray-100 text-gray-800';
+            if (!res.ok || payload.success === false) {
+                throw new Error(payload.message || 'Failed to load sell requests');
+            }
+
+            setSellRequests(payload.data || []);
+            setMeta(payload.meta || { total: 0, page: 1, limit: 20, hasNext: false, hasPrevious: false });
+        } catch (err) {
+            await Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: err.message || 'Failed to load sell requests.',
+                confirmButtonColor: '#0891b2',
+            });
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchSellRequests(page);
+    }, [page, fetchSellRequests]);
+
+    useEffect(() => {
+        if (!openActionMenu) return;
+        const close = () => setOpenActionMenu(null);
+        document.addEventListener('click', close);
+        return () => document.removeEventListener('click', close);
+    }, [openActionMenu]);
+
+    const handleToggleMenu = (e, requestId) => {
+        e.stopPropagation();
+        if (openActionMenu === requestId) {
+            setOpenActionMenu(null);
+            return;
+        }
+        const rect = e.currentTarget.getBoundingClientRect();
+        setMenuPos({ top: rect.bottom + 4, right: window.innerWidth - rect.right });
+        setOpenActionMenu(requestId);
     };
 
-    const getStatusDotColor = (status) => {
-        const colors = {
-            'Contracted': 'bg-purple-500',
-            'New': 'bg-blue-500',
-        };
-        return colors[status] || 'bg-gray-500';
-    };
-
-    const handleStatusChange = (index, newStatus) => {
-        setPhonесData((prev) => prev.map((item, i) => (
-            i === index ? { ...item, status: newStatus } : item
-        )));
+    const handleViewDetails = async (request) => {
         setOpenActionMenu(null);
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${API_BASE_URL}/api/admin/sell-requests/${request.id}`, {
+                headers: token ? { Authorization: `Bearer ${token}` } : {},
+            });
+
+            let payload = {};
+            try { payload = await res.json(); } catch { /* empty */ }
+
+            if (!res.ok || payload.success === false) {
+                throw new Error(payload.message || 'Failed to load request details');
+            }
+
+            setSelectedRequest(payload.data);
+        } catch (err) {
+            await Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: err.message || 'Failed to load details.',
+                confirmButtonColor: '#0891b2',
+            });
+        }
     };
 
-    const handleViewDetails = (index) => {
-        setSelectedPhoneIndex(index);
-        setIsDetailsModalOpen(true);
+    const handleStatusChange = async (request, status) => {
         setOpenActionMenu(null);
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${API_BASE_URL}/api/admin/sell-requests/${request.id}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                },
+                body: JSON.stringify({ status }),
+            });
+
+            let payload = {};
+            try { payload = await res.json(); } catch { /* empty */ }
+
+            if (!res.ok || payload.success === false) {
+                throw new Error(payload.message || 'Failed to update status');
+            }
+
+            setSellRequests((prev) =>
+                prev.map((r) => (r.id === request.id ? { ...r, status: payload.data?.status || status } : r))
+            );
+
+            await Swal.fire({
+                icon: 'success',
+                title: 'Updated',
+                text: payload.message || 'Status updated successfully.',
+                confirmButtonColor: '#0891b2',
+                timer: 2000,
+                showConfirmButton: false,
+            });
+        } catch (err) {
+            await Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: err.message || 'Failed to update status.',
+                confirmButtonColor: '#0891b2',
+            });
+        }
     };
 
-    const closeDetailsModal = () => {
-        setIsDetailsModalOpen(false);
+    const handleDelete = async (request) => {
+        setOpenActionMenu(null);
+
+        const { isConfirmed } = await Swal.fire({
+            title: 'Delete this sell request?',
+            text: 'This action cannot be undone.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Yes, delete',
+        });
+        if (!isConfirmed) return;
+
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${API_BASE_URL}/api/admin/sell-requests/${request.id}`, {
+                method: 'DELETE',
+                headers: token ? { Authorization: `Bearer ${token}` } : {},
+            });
+
+            let payload = {};
+            try { payload = await res.json(); } catch { /* empty */ }
+
+            if (!res.ok || payload.success === false) {
+                throw new Error(payload.message || 'Failed to delete sell request');
+            }
+
+            setSellRequests((prev) => prev.filter((r) => r.id !== request.id));
+
+            await Swal.fire({
+                icon: 'success',
+                title: 'Deleted',
+                text: 'Sell request deleted successfully.',
+                confirmButtonColor: '#0891b2',
+                timer: 2000,
+                showConfirmButton: false,
+            });
+        } catch (err) {
+            await Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: err.message || 'Failed to delete sell request.',
+                confirmButtonColor: '#0891b2',
+            });
+        }
     };
 
     return (
         <div>
             <AdminDashboardTitle
                 title="Sell Phone Manage"
-                subtitle="Track and manage all customer Sell phone"
+                subtitle="Track and manage all customer sell phone requests"
             />
 
             <div className="mt-6 overflow-x-auto rounded-lg border border-gray-200 bg-white">
-                <table className="w-full">
-                    <thead className="border-b border-gray-200 bg-gray-50">
-                        <tr>
-                            <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Customer</th>
-                            <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Phone Number</th>
-                            <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Email</th>
-                            <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Phone Number</th>
-                            <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
-                            <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {phonesData.map((phone, index) => (
-                            <tr key={index} className="border-b border-gray-100 hover:bg-gray-50 transition">
-                                <td className="px-6 py-4 text-sm text-gray-700">{phone.customer}</td>
-                                <td className="px-6 py-4 text-sm text-gray-700">{phone.phoneNumber}</td>
-                                <td className="px-6 py-4 text-sm text-gray-700">{phone.email}</td>
-                                <td className="px-6 py-4 text-sm text-gray-700">{phone.date}</td>
-                                <td className="px-6 py-4">
-                                    <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${getStatusColor(phone.status)}`}>
-                                        {phone.status}
-                                    </span>
-                                </td>
-                                <td className="relative px-6 py-4">
-                                    <button
-                                        type="button"
-                                        onClick={() => setOpenActionMenu(openActionMenu === index ? null : index)}
-                                        className="inline-flex items-center justify-center rounded-full p-2 hover:bg-gray-100"
-                                    >
-                                        <svg className="h-5 w-5 text-gray-500" fill="currentColor" viewBox="0 0 24 24">
-                                            <circle cx="12" cy="5" r="2" />
-                                            <circle cx="12" cy="12" r="2" />
-                                            <circle cx="12" cy="19" r="2" />
-                                        </svg>
-                                    </button>
-
-                                    {openActionMenu === index && (
-                                        <div className="absolute right-0 top-10 z-20 w-44 rounded-xl border border-gray-200 bg-white p-1 shadow-lg">
-                                            <button
-                                                type="button"
-                                                onClick={() => handleViewDetails(index)}
-                                                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium text-gray-700 hover:bg-gray-50"
-                                            >
-                                                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                </svg>
-                                                View Details
-                                            </button>
-                                            <div className="my-1 border-t border-gray-200" />
-                                            <p className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400">
-                                                Change Status
-                                            </p>
-                                            {statusOptions.map((status) => (
-                                                <button
-                                                    key={status}
-                                                    type="button"
-                                                    onClick={() => handleStatusChange(index, status)}
-                                                    className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm transition ${
-                                                        phone.status === status
-                                                            ? 'bg-cyan-50 text-cyan-700'
-                                                            : 'text-gray-700 hover:bg-gray-50'
-                                                    }`}
-                                                >
-                                                    <span className={`h-2 w-2 rounded-full ${getStatusDotColor(status)}`} />
-                                                    <span>{status}</span>
-                                                </button>
-                                            ))}
-                                        </div>
-                                    )}
-                                </td>
+                {loading ? (
+                    <div className="flex items-center justify-center py-20 text-sm text-gray-400">Loading...</div>
+                ) : sellRequests.length === 0 ? (
+                    <div className="flex items-center justify-center py-20 text-sm text-gray-400">No sell requests found.</div>
+                ) : (
+                    <table className="w-full">
+                        <thead className="border-b border-gray-200 bg-gray-50">
+                            <tr>
+                                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Customer</th>
+                                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Device</th>
+                                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Condition</th>
+                                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Offer Price</th>
+                                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Date</th>
+                                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
+                                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Action</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {sellRequests.map((request) => (
+                                <tr key={request.id} className="border-b border-gray-100 hover:bg-gray-50 transition">
+                                    <td className="px-6 py-4">
+                                        <div className="text-sm font-medium text-gray-800">{request.fullName}</div>
+                                        <div className="mt-0.5 text-xs text-gray-500">{request.email}</div>
+                                    </td>
+                                    <td className="px-6 py-4 text-sm text-gray-700">{request.deviceModelName || 'â€”'}</td>
+                                    <td className="px-6 py-4 text-sm text-gray-700">{request.conditionName || 'â€”'}</td>
+                                    <td className="px-6 py-4 text-sm text-gray-700">
+                                        {/* <span className="text-gray-400 line-through text-xs mr-1">${request.baseOfferPrice}</span> */}
+                                        <span className="font-medium text-gray-800">${request.userOfferedPrice}</span>
+                                    </td>
+                                    <td className="px-6 py-4 text-sm text-gray-700">
+                                        {new Date(request.createdAt).toLocaleDateString()}
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${STATUS_STYLES[request.status] || 'bg-gray-100 text-gray-600'}`}>
+                                            {STATUS_LABEL[request.status] || request.status}
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <button
+                                            type="button"
+                                            onClick={(e) => handleToggleMenu(e, request.id)}
+                                            className="inline-flex items-center justify-center rounded-full p-2 hover:bg-gray-100 cursor-pointer"
+                                            aria-label="Open actions"
+                                        >
+                                            <svg className="h-5 w-5 text-gray-500" fill="currentColor" viewBox="0 0 24 24">
+                                                <circle cx="12" cy="5" r="2" />
+                                                <circle cx="12" cy="12" r="2" />
+                                                <circle cx="12" cy="19" r="2" />
+                                            </svg>
+                                        </button>
+
+                                        {openActionMenu === request.id && (
+                                            <div
+                                                style={{ position: 'fixed', top: menuPos.top, right: menuPos.right, zIndex: 50 }}
+                                                className="w-48 rounded-xl border border-gray-200 bg-white p-1 shadow-lg"
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleViewDetails(request)}
+                                                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer"
+                                                >
+                                                    View Details
+                                                </button>
+                                                <div className="my-1 border-t border-gray-200" />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleStatusChange(request, 'CONTRACTED')}
+                                                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer"
+                                                >
+                                                    Mark Contracted
+                                                </button>
+                                                <div className="my-1 border-t border-gray-200" />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleDelete(request)}
+                                                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium text-red-600 hover:bg-red-50 cursor-pointer"
+                                                >
+                                                    Delete
+                                                </button>
+                                            </div>
+                                        )}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                )}
+
+                {!loading && (meta.hasNext || meta.hasPrevious) && (
+                    <div className="flex items-center justify-between border-t border-gray-100 px-6 py-3 text-sm text-gray-600">
+                        <span>
+                            Showing {(meta.page - 1) * meta.limit + 1}â€“{Math.min(meta.page * meta.limit, meta.total)} of {meta.total} results
+                        </span>
+                        <div className="flex gap-2">
+                            <button
+                                type="button"
+                                disabled={!meta.hasPrevious}
+                                onClick={() => setPage((p) => p - 1)}
+                                className="rounded-md border border-gray-200 px-3 py-1 disabled:opacity-40 hover:bg-gray-50 cursor-pointer"
+                            >
+                                Previous
+                            </button>
+                            <button
+                                type="button"
+                                disabled={!meta.hasNext}
+                                onClick={() => setPage((p) => p + 1)}
+                                className="rounded-md border border-gray-200 px-3 py-1 disabled:opacity-40 hover:bg-gray-50 cursor-pointer"
+                            >
+                                Next
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
 
-            <ViewDetailsModal
-                isOpen={isDetailsModalOpen}
-                selectedPhone={selectedPhone}
-                onClose={closeDetailsModal}
-                handleStatusChange={handleStatusChange}
-                statusOptions={statusOptions}
-                phoneDetailImage={phoneDetailImage}
-                selectedPhoneIndex={selectedPhoneIndex}
-            />
+            {/* View Details Modal */}
+            {selectedRequest && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4"
+                    onClick={() => setSelectedRequest(null)}
+                >
+                    <div
+                        className="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="mb-5 flex items-center justify-between">
+                            <h2 className="text-lg font-semibold text-gray-900">Sell Request Details</h2>
+                            <button
+                                onClick={() => setSelectedRequest(null)}
+                                className="text-2xl leading-none text-gray-400 hover:text-gray-600 transition cursor-pointer"
+                                aria-label="Close"
+                            >
+                                ✕
+                            </button>
+                        </div>
+                        <div className="space-y-4 text-sm text-gray-700">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <p className="text-xs font-semibold uppercase text-gray-400">Full Name</p>
+                                    <p className="mt-0.5">{selectedRequest.fullName}</p>
+                                </div>
+                                <div>
+                                    <p className="text-xs font-semibold uppercase text-gray-400">Email</p>
+                                    <p className="mt-0.5">{selectedRequest.email}</p>
+                                </div>
+                                <div>
+                                    <p className="text-xs font-semibold uppercase text-gray-400">Phone</p>
+                                    <p className="mt-0.5">{selectedRequest.phone}</p>
+                                </div>
+                                <div>
+                                    <p className="text-xs font-semibold uppercase text-gray-400">Device</p>
+                                    <p className="mt-0.5">{selectedRequest.deviceModelName || 'â€”'}</p>
+                                </div>
+                                <div>
+                                    <p className="text-xs font-semibold uppercase text-gray-400">Condition</p>
+                                    <p className="mt-0.5">{selectedRequest.conditionName || 'â€”'}</p>
+                                </div>
+                                <div>
+                                    <p className="text-xs font-semibold uppercase text-gray-400">Status</p>
+                                    <span className={`mt-0.5 inline-block rounded-full px-2 py-0.5 text-xs font-semibold ${STATUS_STYLES[selectedRequest.status] || 'bg-gray-100 text-gray-600'}`}>
+                                        {STATUS_LABEL[selectedRequest.status] || selectedRequest.status}
+                                    </span>
+                                </div>
+                                <div>
+                                    <p className="text-xs font-semibold uppercase text-gray-400">Base Offer Price</p>
+                                    <p className="mt-0.5">${selectedRequest.baseOfferPrice}</p>
+                                </div>
+                                <div>
+                                    <p className="text-xs font-semibold uppercase text-gray-400">User Offered Price</p>
+                                    <p className="mt-0.5">${selectedRequest.userOfferedPrice}</p>
+                                </div>
+                                <div className="col-span-2">
+                                    <p className="text-xs font-semibold uppercase text-gray-400">Date</p>
+                                    <p className="mt-0.5">{new Date(selectedRequest.createdAt).toLocaleString()}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
 
 export default CellPhoneMange;
+
