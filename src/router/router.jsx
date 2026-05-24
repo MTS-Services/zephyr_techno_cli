@@ -34,6 +34,7 @@ import AboutDevice from "../pages/public/aboutdevice/AboutDevice";
 import FinalizeSale from "../pages/public/finalizeSale/FinalizeSale";
 import Checkout from "../pages/public/checkout/Checkout";
 import BusinessQuery from "../pages/admin/businessQuery/BusinessQuery";
+import ContactManagement from "../pages/admin/contactManagement/ContactManagement";
 import ForgetCode from "../pages/auth/ForgetCode";
 import Privacy from "../pages/public/privacy-policy/Privacy";
 
@@ -112,6 +113,7 @@ const router = createBrowserRouter([
       { path: "create-promo", element: <CreatePromo /> },
       { path: "user-management", element: <UserManagement /> },
       { path: "business-queries", element: <BusinessQuery /> },
+      { path: "contact-management", element: <ContactManagement /> },
       { path: "settings", element: <Settings /> },
       { path: "profile", element: <AdminProfile /> },
     ],

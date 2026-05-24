@@ -6,30 +6,30 @@ const API_BASE_URL = import.meta.env.VITE_BASE_URL || 'https://api-zephyr-techno
 
 const STATUS_STYLES = {
     NEW: 'bg-amber-100 text-amber-700',
-    CONTACTED: 'bg-green-100 text-green-700',
-    CLOSED: 'bg-gray-100 text-gray-600',
+    PENDING: 'bg-blue-100 text-blue-700',
+    RESOLVED: 'bg-green-100 text-green-700',
 };
 
 const STATUS_LABEL = {
     NEW: 'New',
-    CONTACTED: 'Contacted',
-    CLOSED: 'Closed',
+    PENDING: 'Pending',
+    RESOLVED: 'Resolved',
 };
 
-const BusinessQuery = () => {
-    const [queries, setQueries] = useState([]);
-    const [meta, setMeta] = useState({ total: 0, page: 1, limit: 8, totalPages: 1, hasNext: false, hasPrev: false });
+const ContactManagement = () => {
+    const [contacts, setContacts] = useState([]);
+    const [meta, setMeta] = useState({ total: 0, page: 1, limit: 10, totalPages: 1, hasNext: false, hasPrev: false });
     const [page, setPage] = useState(1);
     const [loading, setLoading] = useState(false);
     const [openActionMenu, setOpenActionMenu] = useState(null);
     const [menuPos, setMenuPos] = useState({ top: 0, right: 0 });
-    const [selectedQuery, setSelectedQuery] = useState(null);
+    const [selectedContact, setSelectedContact] = useState(null);
 
-    const fetchQueries = useCallback(async (currentPage) => {
+    const fetchContacts = useCallback(async (currentPage) => {
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`${API_BASE_URL}/api/admin/business-forms?page=${currentPage}&limit=8`, {
+            const res = await fetch(`${API_BASE_URL}/api/admin/contacts?page=${currentPage}&limit=8`, {
                 headers: token ? { Authorization: `Bearer ${token}` } : {},
             });
 
@@ -37,16 +37,16 @@ const BusinessQuery = () => {
             try { payload = await res.json(); } catch { /* empty */ }
 
             if (!res.ok || payload.success === false) {
-                throw new Error(payload.message || 'Failed to load business queries');
+                throw new Error(payload.message || 'Failed to load contacts');
             }
 
-            setQueries(payload.data || []);
-            setMeta(payload.meta || { total: 0, page: 1, limit: 8, totalPages: 1, hasNext: false, hasPrev: false });
+            setContacts(payload.data || []);
+            setMeta(payload.meta || { total: 0, page: 1, limit: 10, totalPages: 1, hasNext: false, hasPrev: false });
         } catch (err) {
             await Swal.fire({
                 icon: 'error',
                 title: 'Error',
-                text: err.message || 'Failed to load business queries.',
+                text: err.message || 'Failed to load contacts.',
                 confirmButtonColor: '#0891b2',
             });
         } finally {
@@ -55,8 +55,8 @@ const BusinessQuery = () => {
     }, []);
 
     useEffect(() => {
-        fetchQueries(page);
-    }, [page, fetchQueries]);
+        fetchContacts(page);
+    }, [page, fetchContacts]);
 
     useEffect(() => {
         if (!openActionMenu) return;
@@ -65,22 +65,22 @@ const BusinessQuery = () => {
         return () => document.removeEventListener('click', close);
     }, [openActionMenu]);
 
-    const handleToggleMenu = (e, queryId) => {
+    const handleToggleMenu = (e, contactId) => {
         e.stopPropagation();
-        if (openActionMenu === queryId) {
+        if (openActionMenu === contactId) {
             setOpenActionMenu(null);
             return;
         }
         const rect = e.currentTarget.getBoundingClientRect();
         setMenuPos({ top: rect.bottom + 4, right: window.innerWidth - rect.right });
-        setOpenActionMenu(queryId);
+        setOpenActionMenu(contactId);
     };
 
-    const handleViewDetails = async (query) => {
+    const handleViewDetails = async (contact) => {
         setOpenActionMenu(null);
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`${API_BASE_URL}/api/admin/business-forms/${query.id}`, {
+            const res = await fetch(`${API_BASE_URL}/api/admin/contacts/${contact.id}`, {
                 headers: token ? { Authorization: `Bearer ${token}` } : {},
             });
 
@@ -88,10 +88,10 @@ const BusinessQuery = () => {
             try { payload = await res.json(); } catch { /* empty */ }
 
             if (!res.ok || payload.success === false) {
-                throw new Error(payload.message || 'Failed to load query details');
+                throw new Error(payload.message || 'Failed to load contact details');
             }
 
-            setSelectedQuery(payload.data);
+            setSelectedContact(payload.data);
         } catch (err) {
             await Swal.fire({
                 icon: 'error',
@@ -102,11 +102,11 @@ const BusinessQuery = () => {
         }
     };
 
-    const handleStatusChange = async (query, status) => {
+    const handleStatusChange = async (contact, status) => {
         setOpenActionMenu(null);
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`${API_BASE_URL}/api/admin/business-forms/${query.id}`, {
+            const res = await fetch(`${API_BASE_URL}/api/admin/contacts/${contact.id}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
@@ -122,8 +122,8 @@ const BusinessQuery = () => {
                 throw new Error(payload.message || 'Failed to update status');
             }
 
-            setQueries((prev) =>
-                prev.map((q) => (q.id === query.id ? { ...q, status: payload.data?.status || status } : q))
+            setContacts((prev) =>
+                prev.map((c) => (c.id === contact.id ? { ...c, status: payload.data?.status || status } : c))
             );
 
             await Swal.fire({
@@ -144,11 +144,11 @@ const BusinessQuery = () => {
         }
     };
 
-    const handleDelete = async (query) => {
+    const handleDelete = async (contact) => {
         setOpenActionMenu(null);
 
         const { isConfirmed } = await Swal.fire({
-            title: 'Delete this query?',
+            title: 'Delete this contact?',
             text: 'This action cannot be undone.',
             icon: 'warning',
             showCancelButton: true,
@@ -160,7 +160,7 @@ const BusinessQuery = () => {
 
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`${API_BASE_URL}/api/admin/business-forms/${query.id}`, {
+            const res = await fetch(`${API_BASE_URL}/api/admin/contacts/${contact.id}`, {
                 method: 'DELETE',
                 headers: token ? { Authorization: `Bearer ${token}` } : {},
             });
@@ -169,15 +169,15 @@ const BusinessQuery = () => {
             try { payload = await res.json(); } catch { /* empty */ }
 
             if (!res.ok || payload.success === false) {
-                throw new Error(payload.message || 'Failed to delete query');
+                throw new Error(payload.message || 'Failed to delete contact');
             }
 
-            setQueries((prev) => prev.filter((q) => q.id !== query.id));
+            setContacts((prev) => prev.filter((c) => c.id !== contact.id));
 
             await Swal.fire({
                 icon: 'success',
                 title: 'Deleted',
-                text: 'Business query deleted successfully.',
+                text: 'Contact deleted successfully.',
                 confirmButtonColor: '#0891b2',
                 timer: 2000,
                 showConfirmButton: false,
@@ -186,7 +186,7 @@ const BusinessQuery = () => {
             await Swal.fire({
                 icon: 'error',
                 title: 'Error',
-                text: err.message || 'Failed to delete query.',
+                text: err.message || 'Failed to delete contact.',
                 confirmButtonColor: '#0891b2',
             });
         }
@@ -195,50 +195,49 @@ const BusinessQuery = () => {
     return (
         <div>
             <AdminDashboardTitle
-                title="Business Queries"
-                subtitle="Manage and respond to business inquiries"
+                title="Contact Management"
+                subtitle="Manage and respond to contact form submissions"
             />
 
             <div className="mt-6 overflow-x-auto rounded-lg border border-gray-200 bg-white">
                 {loading ? (
                     <div className="flex items-center justify-center py-20 text-sm text-gray-400">Loading...</div>
-                ) : queries.length === 0 ? (
-                    <div className="flex items-center justify-center py-20 text-sm text-gray-400">No business queries found.</div>
+                ) : contacts.length === 0 ? (
+                    <div className="flex items-center justify-center py-20 text-sm text-gray-400">No contacts found.</div>
                 ) : (
                     <table className="w-full">
                         <thead className="border-b border-gray-200 bg-gray-50">
                             <tr>
-                                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Business</th>
-                                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Contact Person</th>
+                                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Name</th>
                                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Email</th>
+                                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Subject</th>
                                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Date</th>
                                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
                                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Action</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {queries.map((query) => {
-
+                            {contacts.map((contact) => {
                                 return (
-                                    <tr key={query.id} className="border-b border-gray-100 hover:bg-gray-50 transition">
+                                    <tr key={contact.id} className="border-b border-gray-100 hover:bg-gray-50 transition">
                                         <td className="px-6 py-4">
-                                            <div className="text-sm font-medium text-gray-800">{query.companyName}</div>
-                                            <div className="mt-1 max-w-xs truncate text-xs text-gray-500">{query.requirements}</div>
+                                            <div className="text-sm font-medium text-gray-800">{contact.firstName}</div>
+                                            <div className="mt-1 max-w-xs truncate text-xs text-gray-500">{contact.message}</div>
                                         </td>
-                                        <td className="px-6 py-4 text-sm text-gray-700">{query.name}</td>
-                                        <td className="px-6 py-4 text-sm text-gray-700">{query.email}</td>
+                                        <td className="px-6 py-4 text-sm text-gray-700">{contact.email}</td>
+                                        <td className="px-6 py-4 text-sm text-gray-700">{contact.subject}</td>
                                         <td className="px-6 py-4 text-sm text-gray-700">
-                                            {new Date(query.createdAt).toLocaleDateString()}
+                                            {new Date(contact.createdAt).toLocaleDateString()}
                                         </td>
                                         <td className="px-6 py-4">
-                                            <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${STATUS_STYLES[query.status] || 'bg-gray-100 text-gray-600'}`}>
-                                                {STATUS_LABEL[query.status] || query.status}
+                                            <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${STATUS_STYLES[contact.status] || 'bg-gray-100 text-gray-600'}`}>
+                                                {STATUS_LABEL[contact.status] || contact.status}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4">
+                                                        <td className="px-6 py-4">
                                             <button
                                                 type="button"
-                                                onClick={(e) => handleToggleMenu(e, query.id)}
+                                                onClick={(e) => handleToggleMenu(e, contact.id)}
                                                 className="inline-flex items-center justify-center rounded-full p-2 hover:bg-gray-100 cursor-pointer"
                                                 aria-label="Open actions"
                                             >
@@ -249,7 +248,7 @@ const BusinessQuery = () => {
                                                 </svg>
                                             </button>
 
-                                            {openActionMenu === query.id && (
+                                            {openActionMenu === contact.id && (
                                                 <div
                                                     style={{ position: 'fixed', top: menuPos.top, right: menuPos.right, zIndex: 50 }}
                                                     className="w-48 rounded-xl border border-gray-200 bg-white p-1 shadow-lg"
@@ -257,7 +256,7 @@ const BusinessQuery = () => {
                                                 >
                                                     <button
                                                         type="button"
-                                                        onClick={() => handleViewDetails(query)}
+                                                        onClick={() => handleViewDetails(contact)}
                                                         className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer"
                                                     >
                                                         View Details
@@ -265,22 +264,22 @@ const BusinessQuery = () => {
                                                     <div className="my-1 border-t border-gray-200" />
                                                     <button
                                                         type="button"
-                                                        onClick={() => handleStatusChange(query, 'CONTACTED')}
+                                                        onClick={() => handleStatusChange(contact, 'PENDING')}
                                                         className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer"
                                                     >
-                                                        Mark Contacted
+                                                        Mark Pending
                                                     </button>
                                                     <button
                                                         type="button"
-                                                        onClick={() => handleStatusChange(query, 'CLOSED')}
+                                                        onClick={() => handleStatusChange(contact, 'RESOLVED')}
                                                         className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer"
                                                     >
-                                                        Mark Closed
+                                                        Mark Resolved
                                                     </button>
                                                     <div className="my-1 border-t border-gray-200" />
                                                     <button
                                                         type="button"
-                                                        onClick={() => handleDelete(query)}
+                                                        onClick={() => handleDelete(contact)}
                                                         className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium text-red-600 hover:bg-red-50 cursor-pointer"
                                                     >
                                                         Delete
@@ -323,19 +322,19 @@ const BusinessQuery = () => {
             </div>
 
             {/* View Details Modal */}
-            {selectedQuery && (
+            {selectedContact && (
                 <div
                     className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4"
-                    onClick={() => setSelectedQuery(null)}
+                    onClick={() => setSelectedContact(null)}
                 >
                     <div
                         className="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="mb-5 flex items-center justify-between">
-                            <h2 className="text-lg font-semibold text-gray-900">Query Details</h2>
+                            <h2 className="text-lg font-semibold text-gray-900">Contact Details</h2>
                             <button
-                                onClick={() => setSelectedQuery(null)}
+                                onClick={() => setSelectedContact(null)}
                                 className="text-2xl leading-none text-gray-400 hover:text-gray-600 transition cursor-pointer"
                                 aria-label="Close"
                             >
@@ -345,35 +344,35 @@ const BusinessQuery = () => {
                         <div className="space-y-4 text-sm text-gray-700">
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <p className="text-xs font-semibold uppercase text-gray-400">Company</p>
-                                    <p className="mt-0.5">{selectedQuery.companyName}</p>
-                                </div>
-                                <div>
-                                    <p className="text-xs font-semibold uppercase text-gray-400">Contact Person</p>
-                                    <p className="mt-0.5">{selectedQuery.name}</p>
+                                    <p className="text-xs font-semibold uppercase text-gray-400">Name</p>
+                                    <p className="mt-0.5">{selectedContact.firstName}</p>
                                 </div>
                                 <div>
                                     <p className="text-xs font-semibold uppercase text-gray-400">Email</p>
-                                    <p className="mt-0.5">{selectedQuery.email}</p>
+                                    <p className="mt-0.5">{selectedContact.email}</p>
                                 </div>
                                 <div>
                                     <p className="text-xs font-semibold uppercase text-gray-400">Phone</p>
-                                    <p className="mt-0.5">{selectedQuery.phone}</p>
+                                    <p className="mt-0.5">{selectedContact.phone}</p>
+                                </div>
+                                <div>
+                                    <p className="text-xs font-semibold uppercase text-gray-400">Subject</p>
+                                    <p className="mt-0.5">{selectedContact.subject}</p>
                                 </div>
                                 <div>
                                     <p className="text-xs font-semibold uppercase text-gray-400">Status</p>
-                                    <span className={`mt-0.5 inline-block rounded-full px-2 py-0.5 text-xs font-semibold ${STATUS_STYLES[selectedQuery.status] || 'bg-gray-100 text-gray-600'}`}>
-                                        {STATUS_LABEL[selectedQuery.status] || selectedQuery.status}
+                                    <span className={`mt-0.5 inline-block rounded-full px-2 py-0.5 text-xs font-semibold ${STATUS_STYLES[selectedContact.status] || 'bg-gray-100 text-gray-600'}`}>
+                                        {STATUS_LABEL[selectedContact.status] || selectedContact.status}
                                     </span>
                                 </div>
                                 <div>
                                     <p className="text-xs font-semibold uppercase text-gray-400">Date</p>
-                                    <p className="mt-0.5">{new Date(selectedQuery.createdAt).toLocaleString()}</p>
+                                    <p className="mt-0.5">{new Date(selectedContact.createdAt).toLocaleString()}</p>
                                 </div>
                             </div>
                             <div>
-                                <p className="text-xs font-semibold uppercase text-gray-400">Requirements</p>
-                                <p className="mt-1 rounded-lg bg-gray-50 p-3 leading-relaxed text-gray-700">{selectedQuery.requirements}</p>
+                                <p className="text-xs font-semibold uppercase text-gray-400">Message</p>
+                                <p className="mt-1 rounded-lg bg-gray-50 p-3 leading-relaxed text-gray-700">{selectedContact.message}</p>
                             </div>
                         </div>
                     </div>
@@ -383,4 +382,4 @@ const BusinessQuery = () => {
     );
 };
 
-export default BusinessQuery;
+export default ContactManagement;
