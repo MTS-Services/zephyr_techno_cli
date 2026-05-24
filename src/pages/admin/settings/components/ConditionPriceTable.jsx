@@ -7,6 +7,7 @@ const ConditionPriceTable = ({
   conditionModelPrices = [],
   onAddPrice,
   onEditPrice,
+  onDeletePrice,
   pageSize = 7,
 }) => {
   const [openMenuKey, setOpenMenuKey] = useState(null);

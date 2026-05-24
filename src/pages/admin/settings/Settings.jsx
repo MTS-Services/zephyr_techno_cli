@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import Swal from 'sweetalert2';
 import SettingsCard from './components/SettingsCard';
 import Tag from './components/Tag';
 import AddModal from './components/AddModal';
@@ -546,21 +547,33 @@ const Settings = () => {
     };
 
     const handleDeleteItem = async (sectionKey, id, index) => {
-        // If deleting a category, series, model, condition, storage, ram, or color option that has an id, call backend
-        if ((sectionKey === 'categories' || sectionKey === 'series' || sectionKey === 'models' || sectionKey === 'conditions' || sectionKey === 'storage' || sectionKey === 'ram' || sectionKey === 'colors') && id) {
+        const { isConfirmed } = await Swal.fire({
+            title: 'Are you sure?',
+            text: 'This action cannot be undone.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Yes, delete',
+        });
+        if (!isConfirmed) return;
+
+        const deleteEndpointBySection = {
+            categories: 'categories',
+            series: 'series',
+            models: 'models',
+            conditions: 'conditions',
+            storage: 'storage-options',
+            ram: 'ram-options',
+            colors: 'colors',
+        };
+
+        const hasApiEndpoint = deleteEndpointBySection[sectionKey] && id;
+
+        if (hasApiEndpoint) {
             try {
                 const token = localStorage.getItem('token');
-                const deleteEndpointBySection = {
-                    categories: 'categories',
-                    series: 'series',
-                    models: 'models',
-                    conditions: 'conditions',
-                    storage: 'storage-options',
-                    ram: 'ram-options',
-                    colors: 'colors',
-                };
-
-                const endpointKey = deleteEndpointBySection[sectionKey] || sectionKey;
+                const endpointKey = deleteEndpointBySection[sectionKey];
                 const res = await fetch(`${API_BASE_URL}/api/admin/attributes/${endpointKey}/${id}`, {
                     method: 'DELETE',
                     headers: {
@@ -568,27 +581,52 @@ const Settings = () => {
                         ...(token ? { Authorization: `Bearer ${token}` } : {}),
                     },
                 });
-                if (!res.ok) {
-                    const text = await res.text();
-                    throw new Error(text || `Failed to delete ${sectionKey}`);
+
+                let payload = {};
+                try { payload = await res.json(); } catch { /* empty body */ }
+
+                if (!res.ok || payload.success === false) {
+                    throw new Error(payload.message || `Failed to delete ${sectionKey}`);
                 }
 
                 setSettings((prev) => ({
                     ...prev,
                     [sectionKey]: prev[sectionKey].filter((_, i) => i !== index),
                 }));
+
+                await Swal.fire({
+                    icon: 'success',
+                    title: 'Deleted',
+                    text: payload.message || 'Item deleted successfully.',
+                    confirmButtonColor: '#0891b2',
+                    timer: 2000,
+                    showConfirmButton: false,
+                });
             } catch (err) {
-                // optionally show error
-                // console.error(err);
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: err.message || 'Failed to delete item.',
+                    confirmButtonColor: '#0891b2',
+                });
             }
             return;
         }
 
-        // default: remove by index
+        // default: local remove by index
         setSettings((prev) => ({
             ...prev,
             [sectionKey]: prev[sectionKey].filter((_, i) => i !== index),
         }));
+
+        await Swal.fire({
+            icon: 'success',
+            title: 'Deleted',
+            text: 'Item removed.',
+            confirmButtonColor: '#0891b2',
+            timer: 2000,
+            showConfirmButton: false,
+        });
     };
 
     const handlePriceChange = (condition, price) => {
@@ -683,20 +721,36 @@ const Settings = () => {
                     }}
                     onDeletePrice={async (entry) => {
                         if (!entry || !entry.id) return;
-                        const ok = window.confirm('Delete this condition price? This action cannot be undone.');
-                        if (!ok) return;
+
+                        const { isConfirmed } = await Swal.fire({
+                            title: 'Delete condition price?',
+                            text: 'This action cannot be undone.',
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#ef4444',
+                            cancelButtonColor: '#6b7280',
+                            confirmButtonText: 'Yes, delete',
+                        });
+                        if (!isConfirmed) return;
+
                         try {
                             const token = localStorage.getItem('token');
-                            const res = await fetch(`${API_BASE_URL}/api/admin/attributes/condition-model-prices/${entry.id}`, {
-                                method: 'DELETE',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-                                },
-                            });
-                            if (!res.ok) {
-                                const text = await res.text();
-                                throw new Error(text || 'Failed to delete condition-model price');
+                            const res = await fetch(
+                                `${API_BASE_URL}/api/admin/attributes/condition-model-prices/${entry.id}`,
+                                {
+                                    method: 'DELETE',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                                    },
+                                }
+                            );
+
+                            let payload = {};
+                            try { payload = await res.json(); } catch { /* empty body */ }
+
+                            if (!res.ok || payload.success === false) {
+                                throw new Error(payload.message || 'Failed to delete condition-model price');
                             }
 
                             setSettings((prev) => {
@@ -719,10 +773,22 @@ const Settings = () => {
                                     conditionPrices: { ...prev.conditionPrices, ...defaultPrices },
                                 };
                             });
+
+                            await Swal.fire({
+                                icon: 'success',
+                                title: 'Deleted',
+                                text: payload.message || 'Condition model price deleted.',
+                                confirmButtonColor: '#0891b2',
+                                timer: 2000,
+                                showConfirmButton: false,
+                            });
                         } catch (err) {
-                            // eslint-disable-next-line no-console
-                            console.error(err);
-                            alert('Failed to delete condition price');
+                            await Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: err.message || 'Failed to delete condition price.',
+                                confirmButtonColor: '#0891b2',
+                            });
                         }
                     }}
                 />

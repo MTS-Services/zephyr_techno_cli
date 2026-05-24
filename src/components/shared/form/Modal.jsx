@@ -14,7 +14,7 @@ const Modal = ({ isOpen, onClose, title, children, maxWidth = 'max-w-md' }) => {
                     <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
                     <button
                         onClick={onClose}
-                        className="text-gray-400 hover:text-gray-600 transition"
+                        className="text-2xl leading-none text-gray-400 hover:text-gray-600 transition cursor-pointer"
                         aria-label="Close modal"
                     >
                         ×
