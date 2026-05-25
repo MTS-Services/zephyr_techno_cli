@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import {
   DollarSign,
   ShoppingCart,
@@ -16,117 +17,161 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import Swal from "sweetalert2";
 import Stats from "./component/Stats";
 import RecentOrder from "./component/RecentOrder";
 import RevenueChart from "./component/RevenueChart";
 import AdminDashboardTitle from "../../../components/dashboards/AdminDashboardTitle";
 
-const chartData = [
-  { month: "Jan", revenue: 35000 },
-  { month: "Feb", revenue: 42000 },
-  { month: "Mar", revenue: 45000 },
-  { month: "Apr", revenue: 38000 },
-  { month: "May", revenue: 40000 },
-  { month: "Jun", revenue: 35000 },
-  { month: "Jul", revenue: 38000 },
-  { month: "Aug", revenue: 50000 },
-  { month: "Sep", revenue: 60000 },
-  { month: "Oct", revenue: 55000 },
-  { month: "Nov", revenue: 45000 },
-  { month: "Dec", revenue: 38000 },
-];
-
-const stats = [
-  {
-    label: "Total Sales",
-    value: "$1,250,000",
-    icon: DollarSign,
-    color: "text-green-500",
-    bg: "bg-green-50",
-  },
-  {
-    label: "Active Orders",
-    value: "156",
-    icon: ShoppingCart,
-    color: "text-orange-500",
-    bg: "bg-orange-50",
-  },
-  {
-    label: "New Phones",
-    value: "45",
-    icon: Smartphone,
-    color: "text-blue-500",
-    bg: "bg-blue-50",
-  },
-  {
-    label: "Used Phones",
-    value: "82",
-    icon: Package,
-    color: "text-yellow-500",
-    bg: "bg-yellow-50",
-  },
-  {
-    label: "Pending Orders",
-    value: "12",
-    icon: Clock,
-    color: "text-cyan-500",
-    bg: "bg-cyan-50",
-  },
-  {
-    label: "Completed",
-    value: "134",
-    icon: CheckCircle,
-    color: "text-yellow-500",
-    bg: "bg-yellow-50",
-  },
-  {
-    label: "Cancelled",
-    value: "10",
-    icon: XCircle,
-    color: "text-red-500",
-    bg: "bg-red-50",
-  },
-];
-
-const recentOrders = [
-  {
-    name: "Rahat Islam",
-    product: "iPhone 15 Pro Max",
-    amount: "$150,000",
-    status: "Pending",
-    statusColor: "text-yellow-500",
-  },
-  {
-    name: "Anika Tabassum",
-    product: "Samsung Galaxy S24 Ultra",
-    amount: "$135,000",
-    status: "Delivered",
-    statusColor: "text-green-500",
-  },
-  {
-    name: "Tanvir Ahmed",
-    product: "Google Pixel 8 Pro",
-    amount: "$85,000",
-    status: "Shipped",
-    statusColor: "text-purple-500",
-  },
-  {
-    name: "Tanvir Ahmed",
-    product: "Google Pixel 8 Pro",
-    amount: "$85,000",
-    status: "Shipped",
-    statusColor: "text-purple-500",
-  },
-  {
-    name: "Tanvir Ahmed",
-    product: "Google Pixel 8 Pro",
-    amount: "$85,000",
-    status: "Shipped",
-    statusColor: "text-purple-500",
-  },
-];
+const API_BASE_URL = import.meta.env.VITE_BASE_URL || 'https://api-zephyr-techno.maktechgroup.tech';
 
 const AdminOverview = () => {
+  const [overviewData, setOverviewData] = useState(null);
+  const [recentOrders, setRecentOrders] = useState([]);
+  const [chartData, setChartData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedYear, setSelectedYear] = useState(2026);
+
+  useEffect(() => {
+    fetchOverviewData();
+    fetchRevenueData(selectedYear);
+  }, [selectedYear]);
+
+  const fetchOverviewData = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${API_BASE_URL}/api/admin/dashboard/overview`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const payload = await res.json();
+
+      if (!res.ok || payload.success === false) {
+        throw new Error(payload.message || 'Failed to fetch overview');
+      }
+
+      setOverviewData(payload.data.cards);
+
+      // Map recent orders
+      const mappedOrders = payload.data.recentOrders.map(order => ({
+        name: order.customer.email,
+        product: order.product.title,
+        amount: `$${order.totalPrice.toLocaleString()}`,
+        status: order.status.charAt(0) + order.status.slice(1).toLowerCase(),
+        statusColor: getStatusColor(order.status)
+      }));
+      setRecentOrders(mappedOrders);
+
+    } catch (err) {
+      await Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: err.message,
+        confirmButtonColor: '#0891b2'
+      });
+    }
+  };
+
+  const fetchRevenueData = async (year) => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${API_BASE_URL}/api/admin/dashboard/revenue-overview?year=${year}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const payload = await res.json();
+
+      if (!res.ok || payload.success === false) {
+        throw new Error(payload.message || 'Failed to fetch revenue data');
+      }
+
+      // Combine labels with monthly data
+      const mapped = payload.data.labels.map((label, index) => ({
+        month: label,
+        revenue: payload.data.year.monthly[index]
+      }));
+      setChartData(mapped);
+      setLoading(false);
+
+    } catch (err) {
+      setLoading(false);
+      await Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: err.message,
+        confirmButtonColor: '#0891b2'
+      });
+    }
+  };
+
+  const getStatusColor = (status) => {
+    const colors = {
+      PENDING: 'text-yellow-500',
+      SHIPPED: 'text-purple-500',
+      DELIVERED: 'text-green-500',
+      CANCELLED: 'text-red-500',
+    };
+    return colors[status] || 'text-gray-500';
+  };
+
+  // Build stats array from overviewData
+  const stats = overviewData ? [
+    {
+      label: "Total Sales",
+      value: `$${overviewData.totalSales.toLocaleString()}`,
+      icon: DollarSign,
+      color: "text-green-500",
+      bg: "bg-green-50",
+    },
+    {
+      label: "Active Orders",
+      value: overviewData.activeOrders.toString(),
+      icon: ShoppingCart,
+      color: "text-orange-500",
+      bg: "bg-orange-50",
+    },
+    {
+      label: "New Phones",
+      value: overviewData.newPhones.toString(),
+      icon: Smartphone,
+      color: "text-blue-500",
+      bg: "bg-blue-50",
+    },
+    {
+      label: "Used Phones",
+      value: overviewData.usedPhones.toString(),
+      icon: Package,
+      color: "text-yellow-500",
+      bg: "bg-yellow-50",
+    },
+    {
+      label: "Pending Orders",
+      value: overviewData.pendingOrders.toString(),
+      icon: Clock,
+      color: "text-cyan-500",
+      bg: "bg-cyan-50",
+    },
+    {
+      label: "Completed",
+      value: overviewData.completedOrders.toString(),
+      icon: CheckCircle,
+      color: "text-yellow-500",
+      bg: "bg-yellow-50",
+    },
+    {
+      label: "Cancelled",
+      value: overviewData.cancelledOrders.toString(),
+      icon: XCircle,
+      color: "text-red-500",
+      bg: "bg-red-50",
+    },
+  ] : [];
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20 text-sm text-gray-400">
+        Loading overview...
+      </div>
+    );
+  }
   return (
     <div>
       <AdminDashboardTitle
@@ -141,7 +186,11 @@ const AdminOverview = () => {
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
         {/* Revenue Overview - 3/5 width */}
         <div className="lg:col-span-3">
-          <RevenueChart chartData={chartData} />
+          <RevenueChart 
+            chartData={chartData} 
+            selectedYear={selectedYear}
+            onYearChange={setSelectedYear}
+          />
         </div>
 
         {/* Recent Orders - 2/5 width */}

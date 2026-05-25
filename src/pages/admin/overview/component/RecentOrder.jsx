@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { ShoppingBag, Smartphone } from 'lucide-react';
 
 const RecentOrder = ({ recentOrders }) => {
@@ -7,9 +8,9 @@ const RecentOrder = ({ recentOrders }) => {
       <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-semibold text-lg text-[#191B1C]">Recent Orders</h2>
-          <span className="text-sm text-[#1B63FF] cursor-pointer underline">
+          <Link to="/dashboard/admin/order" className="text-sm text-[#1B63FF] cursor-pointer hover:underline">
             View All
-          </span>
+          </Link>
         </div>
         <div className="flex flex-col gap-3">
           {recentOrders.map((order, i) => (

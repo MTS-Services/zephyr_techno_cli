@@ -1,7 +1,10 @@
 import React from "react";
 import { Area, AreaChart, ResponsiveContainer, CartesianGrid, XAxis, YAxis, Tooltip } from "recharts";
 
-const RevenueChart = ({ chartData }) => {
+const RevenueChart = ({ chartData, selectedYear, onYearChange }) => {
+  const currentYear = new Date().getFullYear();
+  const lastYear = currentYear - 1;
+
   return (
     <div>
       <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
@@ -12,8 +15,13 @@ const RevenueChart = ({ chartData }) => {
               Revenue and order volume analysis for the current year
             </p>
           </div>
-          <select className="text-xs border border-gray-200 rounded-md px-2 py-1 text-gray-500">
-            <option>This year</option>
+          <select 
+            value={selectedYear}
+            onChange={(e) => onYearChange(Number(e.target.value))}
+            className="text-xs border border-gray-200 rounded-md px-2 py-1 text-gray-500 cursor-pointer"
+          >
+            <option value={currentYear}>This year</option>
+            <option value={lastYear}>Last year</option>
           </select>
         </div>
         <ResponsiveContainer width="100%" height={250}>
