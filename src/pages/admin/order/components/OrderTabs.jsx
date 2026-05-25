@@ -13,7 +13,7 @@ const OrderTabs = ({ activeTab, setActiveTab }) => {
                         aria-selected={activeTab === tab}
                         onClick={() => setActiveTab(tab)}
                         className={`
-                            md:flex-1 text-center py-2.5 md:py-2 px-4 md:px-3.5 
+                            md:flex-1 text-center py-2.5 md:py-2 px-4 md:px-3.5 cursor-pointer
                             text-base md:text-sm 
                             rounded-lg transition-all duration-200 ease-in-out font-medium whitespace-nowrap
                             ${activeTab === tab 
