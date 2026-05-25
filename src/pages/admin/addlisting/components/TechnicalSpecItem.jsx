@@ -6,7 +6,7 @@ const TechnicalSpecItem = ({ index, spec, onSpecificationChange, onValueChange, 
             <label className="block text-sm font-medium text-gray-700 mb-1">Specification</label>
             <TextInput
                 placeholder="Write specification"
-                value={spec.specification}
+                value={spec.name || spec.specification || ''}
                 onChange={(e) => onSpecificationChange(index, e.target.value)}
             />
         </div>
@@ -15,14 +15,14 @@ const TechnicalSpecItem = ({ index, spec, onSpecificationChange, onValueChange, 
             <div className="flex gap-2">
                 <TextInput
                     placeholder="Write value"
-                    value={spec.value}
+                    value={spec.value || ''}
                     onChange={(e) => onValueChange(index, e.target.value)}
                 />
                 {index > 0 && (
                     <button
                         type="button"
                         onClick={() => onRemove(index)}
-                        className="px-3 text-teal-600 hover:text-teal-700 font-medium text-sm"
+                        className="px-3 text-teal-600 hover:text-teal-700 font-medium text-sm cursor-pointer"
                     >
                         Remove
                     </button>

@@ -22,7 +22,7 @@ const FaqItem = ({ index, faq, onQuestionChange, onAnswerChange, onRemove }) => 
                     <button
                         type="button"
                         onClick={() => onRemove(index)}
-                        className="px-3 text-teal-600 hover:text-teal-700 font-medium text-sm"
+                        className="px-3 text-teal-600 hover:text-teal-700 font-medium text-sm cursor-pointer"
                     >
                         Remove
                     </button>

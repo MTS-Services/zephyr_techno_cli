@@ -2,15 +2,17 @@ import React from 'react';
 
 const badgeColors = {
     'New': 'bg-blue-500 text-white',
-    'Excellent (Like New)': 'bg-green-500 text-white',
-    'Very Good': 'bg-cyan-500 text-white',
+    'Old': 'bg-gray-500 text-white',
+    'Excellent': 'bg-green-500 text-white',
+    'Good': 'bg-cyan-500 text-white',
     'Broken': 'bg-red-500 text-white',
 };
 
 const unitsColors = {
     'New': 'text-orange-500',
-    'Excellent (Like New)': 'text-blue-500',
-    'Very Good': 'text-blue-400',
+    'Old': 'text-gray-600',
+    'Excellent': 'text-blue-500',
+    'Good': 'text-blue-400',
     'Broken': 'text-orange-500',
 };
 
@@ -48,7 +50,7 @@ const Card = ({
                 {/* Favorite button top-right */}
                 <button
                     onClick={onFavorite}
-                    className="absolute top-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm border border-gray-100 hover:scale-105 transition-transform"
+                    className="absolute top-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm border border-gray-100 hover:scale-105 transition-transform cursor-pointer"
                 >
                     <svg
                         className={`w-4 h-4 ${isFavorite ? 'fill-yellow-400 stroke-yellow-400' : 'fill-none stroke-gray-400'}`}
@@ -91,13 +93,13 @@ const Card = ({
                 <div className="flex gap-3">
                     <button
                         onClick={onEdit}
-                        className="flex-1 btn-custom text-white text-sm font-medium py-2 rounded transition-colors"
+                        className="flex-1 btn-custom text-white text-sm font-medium py-2 rounded transition-colors cursor-pointer"
                     >
                         Edit
                     </button>
                     <button
                         onClick={onDelete}
-                        className="flex-1 bg-red-500 hover:bg-red-600 text-white text-sm font-medium py-2 rounded transition-colors"
+                        className="flex-1 bg-red-500 hover:bg-red-600 text-white text-sm font-medium py-2 rounded transition-colors cursor-pointer"
                     >
                         Delete
                     </button>

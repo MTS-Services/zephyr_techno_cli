@@ -1,7 +1,29 @@
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 
 const ImageUpload = ({ images, onFilesAdded, onRemove }) => {
     const fileInputRef = useRef(null);
+    const [previews, setPreviews] = useState([]);
+
+    useEffect(() => {
+        // Create preview URLs for File objects
+        const newPreviews = images.map((img) => {
+            if (img instanceof File) {
+                return URL.createObjectURL(img);
+            }
+            // If it's already a URL string (from API)
+            return img;
+        });
+        setPreviews(newPreviews);
+
+        // Cleanup object URLs
+        return () => {
+            newPreviews.forEach((url) => {
+                if (url.startsWith('blob:')) {
+                    URL.revokeObjectURL(url);
+                }
+            });
+        };
+    }, [images]);
 
     const handleImageDrop = (e) => {
         e.preventDefault();
@@ -14,8 +36,16 @@ const ImageUpload = ({ images, onFilesAdded, onRemove }) => {
         onFilesAdded(files);
     };
 
+    const handleRemove = (index, e) => {
+        e.stopPropagation();
+        if (onRemove) {
+            onRemove(index);
+        }
+    };
+
     return (
-        <div>
+        <div className="space-y-4">
+            {/* Upload Area */}
             <div
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={handleImageDrop}
@@ -47,6 +77,34 @@ const ImageUpload = ({ images, onFilesAdded, onRemove }) => {
                 className="hidden"
                 onChange={handleImageSelect}
             />
+
+            {/* Image Previews */}
+            {previews.length > 0 && (
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                    {previews.map((preview, index) => (
+                        <div key={index} className="relative group">
+                            <img
+                                src={preview}
+                                alt={`Preview ${index + 1}`}
+                                className="w-full h-32 object-cover rounded-lg border border-gray-200"
+                            />
+                            {onRemove && (
+                                <button
+                                    type="button"
+                                    onClick={(e) => handleRemove(index, e)}
+                                    className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 cursor-pointer"
+                                    title="Remove image"
+                                >
+                                    &#x2715;
+                                </button>
+                            )}
+                            <div className="absolute bottom-2 left-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded">
+                                {index + 1}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
         </div>
     );
 };
