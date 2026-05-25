@@ -23,8 +23,8 @@ export const INITIAL_FORM = {
     usageLimit: '',
     unlimited: false,
     applicableUsers: 'All User',
-    applicableCategory: 'iPhone',
-    applicableProduct: 'iPhone 16 plus',
+    applicableCategory: '',
+    applicableProduct: '',
 };
 
-export const INITIAL_PRODUCTS = Array(9).fill('iPhone 16 plus');
+export const INITIAL_PRODUCTS = [];
