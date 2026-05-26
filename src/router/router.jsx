@@ -38,6 +38,7 @@ import ContactManagement from "../pages/admin/contactManagement/ContactManagemen
 import ForgetCode from "../pages/auth/ForgetCode";
 import Privacy from "../pages/public/privacy-policy/Privacy";
 import Terms from "../pages/public/terms-condition/Terms";
+import Refund from "../pages/public/refund-policy/Refund";
 
 const router = createBrowserRouter([
   {
@@ -79,6 +80,10 @@ const router = createBrowserRouter([
       {
         path: "terms-condition",
         element: <Terms />,
+      },
+      {
+        path: "refund-policy",
+        element: <Refund />,
       },
       {
         path: "for-businesses",
