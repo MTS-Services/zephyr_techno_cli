@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Container from "../../../layout/Container";
 import ProductCard from "./components/ProductCard";
 import Filter from "./components/Filter";
@@ -6,16 +6,22 @@ import Pagination from "./components/Pagination";
 import EmptyState from "./components/EmptyState";
 import { PRODUCTS } from "./constants";
 
+const API_BASE_URL = import.meta.env.VITE_BASE_URL || 'https://api-zephyr-techno.maktechgroup.tech';
+
 // ── Main Page ─────────────────────────────────────────────────────────────────
 export default function Products() {
   const [condition, setCondition] = useState("All");
   const [series, setSeries] = useState("All");
   const [storage, setStorage] = useState(null);
+  const [ram, setRam] = useState(null);
   const [activeColor, setActiveColor] = useState(null);
   const [priceRange, setPriceRange] = useState(2000);
   const [sortBy, setSortBy] = useState("All");
   const [page, setPage] = useState(1);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [attributes, setAttributes] = useState(null);
+  const [isLoadingAttributes, setIsLoadingAttributes] = useState(true);
+
   const sortOptions = [
     "All",
     "Featured",
@@ -23,6 +29,33 @@ export default function Products() {
     "Price: High to Low",
     "Newest",
   ];
+
+  // Fetch filter attributes
+  useEffect(() => {
+    const fetchAttributes = async () => {
+      try {
+        setIsLoadingAttributes(true);
+        const response = await fetch(`${API_BASE_URL}/api/public/product/attributes`);
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch attributes');
+        }
+
+        const data = await response.json();
+        
+        if (data.success && data.data) {
+          setAttributes(data.data);
+        }
+      } catch (error) {
+        console.error('Error fetching product attributes:', error);
+        // Attributes will remain null, Filter will use fallback constants
+      } finally {
+        setIsLoadingAttributes(false);
+      }
+    };
+
+    fetchAttributes();
+  }, []);
 
   const closeFilterPanel = () => setIsFilterOpen(false);
 
@@ -154,10 +187,14 @@ export default function Products() {
                 setSeries={setSeries}
                 storage={storage}
                 setStorage={setStorage}
+                ram={ram}
+                setRam={setRam}
                 priceRange={priceRange}
                 setPriceRange={setPriceRange}
                 activeColor={activeColor}
                 setActiveColor={setActiveColor}
+                attributes={attributes}
+                isLoadingAttributes={isLoadingAttributes}
                 onApply={closeFilterPanel}
               />
             </div>
@@ -173,10 +210,14 @@ export default function Products() {
                 setSeries={setSeries}
                 storage={storage}
                 setStorage={setStorage}
+                ram={ram}
+                setRam={setRam}
                 priceRange={priceRange}
                 setPriceRange={setPriceRange}
                 activeColor={activeColor}
                 setActiveColor={setActiveColor}
+                attributes={attributes}
+                isLoadingAttributes={isLoadingAttributes}
               />
             </div>
 

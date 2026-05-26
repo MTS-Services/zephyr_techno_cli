@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { CONDITIONS, SERIES_LIST, STORAGES, COLORS_LIST } from "../constants";
+import { CONDITIONS, SERIES_LIST, STORAGES, RAM_OPTIONS, COLORS_LIST } from "../constants";
 
 // ── Sidebar Filters ───────────────────────────────────────────────────────────
 function FilterSection({ title, children }) {
@@ -64,10 +64,14 @@ const Filter = ({
   setSeries,
   storage,
   setStorage,
+  ram,
+  setRam,
   priceRange,
   setPriceRange,
   activeColor,
   setActiveColor,
+  attributes,
+  isLoadingAttributes,
   onApply,
 }) => {
   const [usedOpen, setUsedOpen] = useState(true);
@@ -75,6 +79,52 @@ const Filter = ({
   const apply = () => {
     if (onApply) onApply();
   };
+
+  // Helper function to map color names to hex values
+  const getColorHex = (colorName) => {
+    const colorMap = {
+      'black': '#1a1a1a',
+      'midnight black': '#1a1a1a',
+      'white': '#f0ede8',
+      'starlight': '#f0ede8',
+      'yellow': '#f5d76e',
+      'blue': '#6ab0e8',
+      'blue titanium': '#4a6fa5',
+      'purple': '#6b3fa0',
+      'pink': '#e8b4b8',
+      'rose gold': '#e8b4b8',
+      'natural titanium': '#8b8681',
+      'gold': '#f9d77e',
+      'silver': '#e5e5e5',
+      'green': '#4a7c59',
+      'red': '#d32f2f',
+      'midnight': '#1a1a2e',
+    };
+    const normalized = colorName.toLowerCase().trim();
+    return colorMap[normalized] || '#000000';
+  };
+
+  // Extract data from API or use fallback
+  const seriesList = attributes?.series 
+    ? ["All", ...attributes.series.map(s => s.name)] 
+    : SERIES_LIST;
+  
+  const storageOptions = attributes?.storageOptions 
+    ? attributes.storageOptions.map(s => s.name) 
+    : STORAGES;
+  
+  const ramOptions = attributes?.ramOptions 
+    ? attributes.ramOptions.map(r => r.name) 
+    : RAM_OPTIONS;
+  
+  const colorsList = attributes?.colors 
+    ? attributes.colors.map(c => ({ label: c.name, hex: getColorHex(c.name) }))
+    : COLORS_LIST;
+
+  // Get condition structure
+  const conditionsData = attributes?.conditions || CONDITIONS;
+  const usedCondition = conditionsData.find(c => c.key === "USED");
+  const usedSubItems = usedCondition?.items || [];
 
   return (
     <div>
@@ -88,6 +138,7 @@ const Filter = ({
               setCondition("All");
               setSeries("All");
               setStorage(null);
+              setRam(null);
               setActiveColor(null);
               setPriceRange(2000);
               apply();
@@ -97,6 +148,15 @@ const Filter = ({
             Clear All
           </button>
         </div>
+
+        {isLoadingAttributes && (
+          <div className="flex items-center justify-center py-8">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-custom"></div>
+          </div>
+        )}
+
+        {!isLoadingAttributes && (
+          <>
 
         {/* Condition */}
         <FilterSection title="Condition">
@@ -123,7 +183,21 @@ const Filter = ({
                 </div>
               </div>
               
-              {usedOpen && (
+              {usedOpen && usedSubItems.length > 0 && (
+                <div className="flex flex-col gap-3 pl-7 mt-3">
+                  {usedSubItems.map((item) => (
+                    <CustomRadio 
+                      key={item.id} 
+                      label={item.name} 
+                      value={item.name} 
+                      currentValue={condition} 
+                      onChange={(v) => { setCondition(v); apply(); }} 
+                    />
+                  ))}
+                </div>
+              )}
+
+              {usedOpen && usedSubItems.length === 0 && (
                 <div className="flex flex-col gap-3 pl-7 mt-3">
                   <CustomRadio label="Excellent (Like New)" value="Excellent (Like New)" currentValue={condition} onChange={(v) => { setCondition(v); apply(); }} />
                   <CustomRadio label="Very Good" value="Very Good" currentValue={condition} onChange={(v) => { setCondition(v); apply(); }} />
@@ -137,7 +211,7 @@ const Filter = ({
         <FilterSection title="Series">
           <RadioGroup
             name="series"
-            options={SERIES_LIST}
+            options={seriesList}
             value={series}
             onChange={(value) => {
               setSeries(value);
@@ -177,7 +251,7 @@ const Filter = ({
         {/* Storage */}
         <FilterSection title="Storage">
           <div className="grid grid-cols-2 gap-2">
-            {STORAGES.map((s) => (
+            {storageOptions.map((s) => (
               <button
                 key={s}
                 onClick={() => {
@@ -197,10 +271,33 @@ const Filter = ({
           </div>
         </FilterSection>
 
+        {/* RAM */}
+        <FilterSection title="RAM">
+          <div className="grid grid-cols-2 gap-2">
+            {ramOptions.map((r) => (
+              <button
+                key={r}
+                onClick={() => {
+                  setRam(ram === r ? null : r);
+                  apply();
+                }}
+                className={`py-1.5 rounded-lg text-[14px] leading-5 font-medium border transition-all
+                      ${
+                        ram === r
+                          ? "bg-custom border-custom text-white"
+                          : "bg-white border-gray-200 text-gray-600 hover:border-custom"
+                      }`}
+              >
+                {r}
+              </button>
+            ))}
+          </div>
+        </FilterSection>
+
         {/* Color */}
         <FilterSection title="Color">
           <div className="flex flex-wrap gap-2">
-            {COLORS_LIST.map((c) => (
+            {colorsList.map((c) => (
               <button
                 key={c.hex}
                 title={c.label}
@@ -219,6 +316,8 @@ const Filter = ({
             ))}
           </div>
         </FilterSection>
+        </>
+        )}
       </aside>
     </div>
   );
