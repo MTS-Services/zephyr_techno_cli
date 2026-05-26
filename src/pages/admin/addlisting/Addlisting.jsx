@@ -54,6 +54,10 @@ const Addlisting = ({ isEdit = false, listingId = null }) => {
     const [storageOptions, setStorageOptions] = useState([]);
     const [ramOptions, setRamOptions] = useState([]);
     const [filteredModels, setFilteredModels] = useState([]);
+    
+    // Category-condition business rules
+    const [availableConditions, setAvailableConditions] = useState([]);
+    const [conditionDisabled, setConditionDisabled] = useState(false);
 
     // Fetch all attribute options on mount
     useEffect(() => {
@@ -72,6 +76,7 @@ const Addlisting = ({ isEdit = false, listingId = null }) => {
                 setAllSeries(data.series || []);
                 setAllModels(data.models || []);
                 setConditions(data.conditions || []);
+                setAvailableConditions(data.conditions || []);
                 setColors(data.colors || []);
                 setStorageOptions(data.storageOptions || []);
                 setRamOptions(data.ramOptions || []);
@@ -92,6 +97,25 @@ const Addlisting = ({ isEdit = false, listingId = null }) => {
         }
     }, [formData.seriesId, allModels]);
 
+    // Apply category-condition rules when editing an existing listing
+    // (runs after both conditions and formData.categoryId are available)
+    useEffect(() => {
+        if (!isEdit || !conditions.length || !formData.categoryId) return;
+        const category = categories.find(cat => cat.id === formData.categoryId);
+        const categoryName = category?.name?.toLowerCase();
+        if (categoryName === 'new') {
+            const newCond = conditions.find(c => c.name?.toLowerCase() === 'new');
+            setConditionDisabled(true);
+            setAvailableConditions(newCond ? [newCond] : []);
+        } else if (categoryName === 'used') {
+            setConditionDisabled(false);
+            setAvailableConditions(conditions.filter(c => c.name?.toLowerCase() !== 'new'));
+        } else {
+            setConditionDisabled(false);
+            setAvailableConditions(conditions);
+        }
+    }, [isEdit, conditions, categories, formData.categoryId]);
+
     // Fetch listing data when in edit mode
     useEffect(() => {
         if (isEdit && listingId) {
@@ -108,9 +132,10 @@ const Addlisting = ({ isEdit = false, listingId = null }) => {
                     
                     const listing = payload.data;
                     // Map API data to form structure
+                    const loadedCategoryId = listing.category?.id || '';
                     setFormData({
                         title: listing.title || '',
-                        categoryId: listing.category?.id || '',
+                        categoryId: loadedCategoryId,
                         seriesId: listing.series?.id || '',
                         deviceModelId: listing.deviceModel?.id || '',
                         conditionId: listing.condition?.id || '',
@@ -137,6 +162,31 @@ const Addlisting = ({ isEdit = false, listingId = null }) => {
 
     const updateField = (name, value) => {
         setFormData((prev) => ({ ...prev, [name]: value }));
+    };
+
+    // Handle category change with business rules
+    const handleCategoryChange = (e) => {
+        const selectedCategoryId = e.target.value;
+        updateField('categoryId', selectedCategoryId);
+
+        const category = categories.find(cat => cat.id === selectedCategoryId);
+        const categoryName = category?.name?.toLowerCase();
+
+        if (categoryName === 'new') {
+            const newCondition = conditions.find(c => c.name?.toLowerCase() === 'new');
+            updateField('conditionId', newCondition?.id || '');
+            setConditionDisabled(true);
+            setAvailableConditions(newCondition ? [newCondition] : []);
+        } else if (categoryName === 'used') {
+            const usedConditions = conditions.filter(c => c.name?.toLowerCase() !== 'new');
+            setAvailableConditions(usedConditions);
+            setConditionDisabled(false);
+            updateField('conditionId', '');
+        } else {
+            setAvailableConditions(conditions);
+            setConditionDisabled(false);
+            updateField('conditionId', '');
+        }
     };
 
     const handleChange = (e) => {
@@ -291,7 +341,7 @@ const Addlisting = ({ isEdit = false, listingId = null }) => {
                         <SelectInput
                             name="categoryId"
                             value={formData.categoryId}
-                            onChange={handleChange}
+                            onChange={handleCategoryChange}
                             options={[
                                 { value: '', label: 'Select Category' },
                                 ...categories.map(c => ({ value: c.id, label: c.name }))
@@ -329,9 +379,10 @@ const Addlisting = ({ isEdit = false, listingId = null }) => {
                             name="conditionId"
                             value={formData.conditionId}
                             onChange={handleChange}
+                            disabled={conditionDisabled}
                             options={[
-                                { value: '', label: 'Select Condition' },
-                                ...conditions.map(c => ({ value: c.id, label: c.name }))
+                                { value: '', label: conditionDisabled ? 'New (Auto-selected)' : 'Select Condition' },
+                                ...availableConditions.map(c => ({ value: c.id, label: c.name }))
                             ]}
                         />
                     </FormField>
