@@ -37,6 +37,7 @@ import BusinessQuery from "../pages/admin/businessQuery/BusinessQuery";
 import ContactManagement from "../pages/admin/contactManagement/ContactManagement";
 import ForgetCode from "../pages/auth/ForgetCode";
 import Privacy from "../pages/public/privacy-policy/Privacy";
+import Terms from "../pages/public/terms-condition/Terms";
 
 const router = createBrowserRouter([
   {
@@ -74,6 +75,10 @@ const router = createBrowserRouter([
       {
         path: "privacy-policy",
         element: <Privacy />,
+      },
+      {
+        path: "terms-condition",
+        element: <Terms />,
       },
       {
         path: "for-businesses",
