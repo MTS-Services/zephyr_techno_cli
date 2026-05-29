@@ -34,6 +34,7 @@ const tableOfContents = [
     { number: "29", id: "statutory-rights", title: "Statutory Rights" },
     { number: "30", id: "contact", title: "Contact Information" },
     { number: "31", id: "updates", title: "Updates to These Terms" },
+    { number: "32", id: "vat-scheme", title: "VAT Scheme Information" },
 ];
 
 const termsSections = [
@@ -425,6 +426,17 @@ const termsSections = [
         content: [
             "Zephyr Technology reserves the right to amend or update these Terms and Conditions at any time without prior notice.",
             "The latest version will be published on our website and will be effective immediately upon posting.",
+        ],
+    },
+    {
+        number: "32",
+        id: "vat-scheme",
+        title: "VAT Scheme Information",
+        content: [
+            "Certain products sold by Zephyr Technology may be supplied under the VAT Margin Scheme for second-hand goods in accordance with HMRC regulations unless otherwise stated.",
+            "Where the VAT Margin Scheme applies, VAT is not separately reclaimable or itemised on customer invoices.",
+            "Where products are sold with standard VAT treatment, this will be clearly stated where applicable.",
+            "Zephyr Technology reserves the right to determine the applicable VAT treatment for products sold through the website or through direct business transactions.",
         ],
     },
 ];
