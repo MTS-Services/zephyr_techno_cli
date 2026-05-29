@@ -1,5 +1,6 @@
 // src/components/Review.jsx
 // npm install swiper
+import React from 'react';
 
 import { useRef, useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';

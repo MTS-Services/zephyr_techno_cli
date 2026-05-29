@@ -1,3 +1,4 @@
+import React from 'react';
 import { Link } from 'react-router';
 import newPhone from '../../../assets/category/newPhone.webp';
 import usedPhone from '../../../assets/category/usedPhone.webp'

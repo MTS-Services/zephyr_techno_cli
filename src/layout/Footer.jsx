@@ -1,3 +1,4 @@
+import React from "react";
 import logo from "../assets/logo.webp";
 import Container from "./Container";
 import { Link } from "react-router";
@@ -14,8 +15,11 @@ const Footer = () => {
           {/* Brand */}
           <div className="sm:col-span-2 max-w-md">
             <img src={logo} className="w-36 mb-3" alt="Zephyr Technology" />
-            <p className="text-base text-[#6A6A6A] font-normal">
+            {/* <p className="text-base text-[#6A6A6A] font-normal">
               Premium mobile technology solutions. From flagship new devices to certified refurbished phones.
+            </p> */}
+            <p className="text-base text-[#6A6A6A] font-normal">
+              Zephyr Technology is an independent retailer and is not affiliated with, authorised by, sponsored by, or endorsed by Apple Inc. or any other manufacturer unless explicitly stated.
             </p>
             <div className="flex gap-3 mt-4">
               <a href="#" className="w-8 h-8 rounded-full border border-black/20 flex items-center justify-center hover:bg-black/10 transition-colors">
@@ -76,7 +80,6 @@ const Footer = () => {
           </div>
 
         </div>
-
         {/* Bottom bar */}
         <div className="border-t border-black/10 py-4 text-center text-sm text-[#6A6A6A]">
           © {currentYear} Zephyr Technology. All rights reserved.

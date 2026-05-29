@@ -1,3 +1,4 @@
+import React from 'react';
 import promotion from '../../../assets/banner/promotions.webp';
 import mobileBanner from '../../../assets/banner/newone.webp';
 import { Link } from 'react-router';

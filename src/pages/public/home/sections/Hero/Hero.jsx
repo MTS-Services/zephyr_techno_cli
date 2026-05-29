@@ -1,3 +1,4 @@
+import React from 'react';
 import banner from '../../../../../../src/assets/banner/hero.webp'
 import mobileBanner from '../../../../../../src/assets/banner/mobilebanner.webp'
 import { Link } from 'react-router';

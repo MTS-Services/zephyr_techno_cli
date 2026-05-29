@@ -1,3 +1,5 @@
+import React from 'react'
+
 export default function Stars({ rating }) {
   return (
     <div className="flex items-center gap-0.5">

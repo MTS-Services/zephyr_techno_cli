@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { FiShoppingCart, FiX, FiMenu, FiLogOut, FiUser } from "react-icons/fi";
 import logo from "../assets/logo.webp";
