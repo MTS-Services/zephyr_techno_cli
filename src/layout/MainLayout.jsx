@@ -11,7 +11,9 @@ const MainLayout = () => {
         <>
             <ScrollToTop />
             <div>
-                <Navbar/>
+                <div className="sticky top-0 z-50 bg-white shadow-sm">
+                    <Navbar/>
+                </div>
                 <main>
                     <Outlet/>
                 </main>
