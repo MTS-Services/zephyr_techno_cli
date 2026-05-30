@@ -104,9 +104,8 @@ const Addlisting = ({ isEdit = false, listingId = null }) => {
         const category = categories.find(cat => cat.id === formData.categoryId);
         const categoryName = category?.name?.toLowerCase();
         if (categoryName === 'new') {
-            const newCond = conditions.find(c => c.name?.toLowerCase() === 'new');
-            setConditionDisabled(true);
-            setAvailableConditions(newCond ? [newCond] : []);
+            setConditionDisabled(false);
+            setAvailableConditions(conditions);
         } else if (categoryName === 'used') {
             setConditionDisabled(false);
             setAvailableConditions(conditions.filter(c => c.name?.toLowerCase() !== 'new'));
@@ -173,30 +172,36 @@ const Addlisting = ({ isEdit = false, listingId = null }) => {
         const categoryName = category?.name?.toLowerCase();
 
         if (categoryName === 'new') {
-            const newCondition = conditions.find(c => c.name?.toLowerCase() === 'new');
-            updateField('conditionId', newCondition?.id || '');
+            setAvailableConditions([]);
             setConditionDisabled(true);
-            setAvailableConditions(newCondition ? [newCondition] : []);
+            updateField('conditionId', '');
         } else if (categoryName === 'used') {
             const usedConditions = conditions.filter(c => c.name?.toLowerCase() !== 'new');
             setAvailableConditions(usedConditions);
             setConditionDisabled(false);
-            updateField('conditionId', '');
+            updateField('conditionId', usedConditions[0]?.id || '');
         } else {
             setAvailableConditions(conditions);
             setConditionDisabled(false);
-            updateField('conditionId', '');
+            updateField('conditionId', conditions[0]?.id || '');
         }
     };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        // For array fields, convert single value to array
-        if (name === 'colorIds' || name === 'storageOptionIds' || name === 'ramOptionIds') {
-            updateField(name, value ? [value] : []);
-        } else {
-            updateField(name, value);
-        }
+        updateField(name, value);
+    };
+
+    const handleMultiToggle = (field, id) => {
+        setFormData((prev) => {
+            const current = prev[field];
+            return {
+                ...prev,
+                [field]: current.includes(id)
+                    ? current.filter((v) => v !== id)
+                    : [...current, id],
+            };
+        });
     };
 
     const handleFaqQuestionChange = (index, value) => {
@@ -245,6 +250,22 @@ const Addlisting = ({ isEdit = false, listingId = null }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // Client-side validation
+        const required = [
+            { key: 'title', label: 'Product Title' },
+            { key: 'categoryId', label: 'Category' },
+            { key: 'seriesId', label: 'Series' },
+            { key: 'deviceModelId', label: 'Model' },
+            ...(!conditionDisabled ? [{ key: 'conditionId', label: 'Condition' }] : []),
+            { key: 'basePrice', label: 'Price' },
+        ];
+        const missing = required.filter(f => !formData[f.key]).map(f => f.label);
+        if (missing.length > 0) {
+            await Swal.fire({ icon: 'warning', title: 'Required Fields', text: `Please fill in: ${missing.join(', ')}`, confirmButtonColor: '#0891b2' });
+            return;
+        }
+
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
@@ -255,7 +276,7 @@ const Addlisting = ({ isEdit = false, listingId = null }) => {
             formDataToSend.append('categoryId', formData.categoryId);
             formDataToSend.append('seriesId', formData.seriesId);
             formDataToSend.append('deviceModelId', formData.deviceModelId);
-            formDataToSend.append('conditionId', formData.conditionId);
+            if (formData.conditionId) formDataToSend.append('conditionId', formData.conditionId);
             formDataToSend.append('basePrice', formData.basePrice);
             formDataToSend.append('stockQuantity', formData.stockQuantity);
             formDataToSend.append('introduction', formData.introduction);
@@ -375,18 +396,20 @@ const Addlisting = ({ isEdit = false, listingId = null }) => {
                             disabled={!formData.seriesId}
                         />
                     </FormField>
+                    {!conditionDisabled && (
                     <FormField label="Condition">
                         <SelectInput
                             name="conditionId"
                             value={formData.conditionId}
                             onChange={handleChange}
-                            disabled={conditionDisabled}
+                            disabled={false}
                             options={[
-                                { value: '', label: conditionDisabled ? 'New (Auto-selected)' : 'Select Condition' },
+                                { value: '', label: 'Select Condition' },
                                 ...availableConditions.map(c => ({ value: c.id, label: c.name }))
                             ]}
                         />
                     </FormField>
+                    )}
                     <FormField label="Price">
                         <NumberInput
                             name="basePrice"
@@ -399,15 +422,20 @@ const Addlisting = ({ isEdit = false, listingId = null }) => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <FormField label="Color">
-                        <SelectInput
-                            name="colorIds"
-                            value={formData.colorIds[0] || ''}
-                            onChange={handleChange}
-                            options={[
-                                { value: '', label: 'Select Color' },
-                                ...colors.map(c => ({ value: c.id, label: c.name }))
-                            ]}
-                        />
+                        <div className="flex flex-wrap gap-2">
+                            {colors.map(c => (
+                                <label key={c.id} className="flex items-center gap-1.5 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={formData.colorIds.includes(c.id)}
+                                        onChange={() => handleMultiToggle('colorIds', c.id)}
+                                        className="accent-teal-600"
+                                    />
+                                    <span className="text-base text-gray-700">{c.name}</span>
+                                </label>
+                            ))}
+                            {colors.length === 0 && <span className="text-sm text-gray-400">No colors available</span>}
+                        </div>
                     </FormField>
                     <FormField label="Stock Quantity">
                         <NumberInput
@@ -421,26 +449,36 @@ const Addlisting = ({ isEdit = false, listingId = null }) => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <FormField label="Storage Options">
-                        <SelectInput
-                            name="storageOptionIds"
-                            value={formData.storageOptionIds[0] || ''}
-                            onChange={handleChange}
-                            options={[
-                                { value: '', label: 'Select Storage' },
-                                ...storageOptions.map(s => ({ value: s.id, label: s.name }))
-                            ]}
-                        />
+                        <div className="flex flex-wrap gap-2">
+                            {storageOptions.map(s => (
+                                <label key={s.id} className="flex items-center gap-1.5 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={formData.storageOptionIds.includes(s.id)}
+                                        onChange={() => handleMultiToggle('storageOptionIds', s.id)}
+                                        className="accent-teal-600"
+                                    />
+                                    <span className="text-base text-gray-700">{s.name}</span>
+                                </label>
+                            ))}
+                            {storageOptions.length === 0 && <span className="text-sm text-gray-400">No storage options</span>}
+                        </div>
                     </FormField>
-                    <FormField label="RAM Option">
-                        <SelectInput
-                            name="ramOptionIds"
-                            value={formData.ramOptionIds[0] || ''}
-                            onChange={handleChange}
-                            options={[
-                                { value: '', label: 'Select RAM' },
-                                ...ramOptions.map(r => ({ value: r.id, label: r.name }))
-                            ]}
-                        />
+                    <FormField label="RAM Options">
+                        <div className="flex flex-wrap gap-2">
+                            {ramOptions.map(r => (
+                                <label key={r.id} className="flex items-center gap-1.5 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={formData.ramOptionIds.includes(r.id)}
+                                        onChange={() => handleMultiToggle('ramOptionIds', r.id)}
+                                        className="accent-teal-600"
+                                    />
+                                    <span className="text-base text-gray-700">{r.name}</span>
+                                </label>
+                            ))}
+                            {ramOptions.length === 0 && <span className="text-sm text-gray-400">No RAM options</span>}
+                        </div>
                     </FormField>
                 </div>
 

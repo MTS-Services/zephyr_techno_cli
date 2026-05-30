@@ -399,6 +399,7 @@
 
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router";
 import Container from "../../../layout/Container";
 import ProductCard from "./components/ProductCard";
 import Filter from "./components/Filter";
@@ -408,6 +409,7 @@ import EmptyState from "./components/EmptyState";
 const API_BASE_URL = import.meta.env.VITE_BASE_URL || 'https://api-zephyr-techno.maktechgroup.tech';
 
 export default function Products() {
+  const [searchParams] = useSearchParams();
   const [categoryId, setCategoryId] = useState(null);
   const [seriesId, setSeriesId] = useState(null);
   const [conditionId, setConditionId] = useState(null);
@@ -476,7 +478,26 @@ export default function Products() {
         const response = await fetch(`${API_BASE_URL}/api/public/product/attributes`);
         if (!response.ok) throw new Error('Failed to fetch attributes');
         const data = await response.json();
-        if (data.success && data.data) setAttributes(data.data);
+        if (data.success && data.data) {
+          setAttributes(data.data);
+          // Apply filter from URL query param after attributes load
+          const filterParam = searchParams.get('filter');
+          if (filterParam === 'NEW') {
+            const newFilter = (data.data.categoryFilters || []).find(c => c.key === 'NEW');
+            if (newFilter) {
+              setCategoryId(newFilter.categoryId);
+              setConditionId(newFilter.conditionId || null);
+              setSelectedFilterKey('NEW');
+            }
+          } else if (filterParam === 'USED') {
+            const usedFilter = (data.data.categoryFilters || []).find(c => c.key === 'USED');
+            if (usedFilter) {
+              setCategoryId(usedFilter.categoryId);
+              setConditionId(null);
+              setSelectedFilterKey('USED');
+            }
+          }
+        }
       } catch (error) {
         console.error('Error fetching product attributes:', error);
       } finally {

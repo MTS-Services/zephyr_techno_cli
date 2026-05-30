@@ -24,7 +24,7 @@ const Category = () => {
                         />
                         <div className="absolute inset-x-0 bottom-0 p-6 sm:p-8">
                             <Link
-                                to='/products'
+                                to='/products?filter=NEW'
                                 className="inline-flex cursor-pointer hover:scale-105 transform transition-all duration-300 items-center rounded-lg bg-[#323F64] px-4 py-2 text-sm font-semibold text-white"
                             >
                                 Browse New
@@ -40,7 +40,7 @@ const Category = () => {
                         />
                         <div className="absolute inset-x-0 bottom-0 p-6 sm:p-8">
                             <Link
-                                to='/products'
+                                to='/products?filter=USED'
                                 className="inline-flex items-center rounded-lg bg-[#323F64] px-4 py-2 text-sm font-semibold text-white cursor-pointer hover:scale-105 transform transition-all duration-300"
                             >
                                 Browse Used Phones
