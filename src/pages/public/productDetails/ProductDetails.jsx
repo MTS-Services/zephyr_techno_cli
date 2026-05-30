@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useParams, Link } from "react-router";
 import Container from "../../../layout/Container";
 import {
   FiMinus,
@@ -8,54 +9,63 @@ import {
   FiCheckCircle,
   FiTruck,
 } from "react-icons/fi";
-import {
-  MdOutlineSmartphone,
-  MdOutlineCameraAlt,
-  MdOutlineCreate,
-} from "react-icons/md";
-import { FaMicrochip } from "react-icons/fa";
-import { HiChip } from "react-icons/hi";
 import RelatedProducts from "./sections/relatedProduct/RelatedProducts";
-import { Link } from "react-router";
+
+const BASE_URL = import.meta.env.VITE_BASE_URL;
 
 const ProductDetails = () => {
+  const { id } = useParams();
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   const [selectedImage, setSelectedImage] = useState(0);
-  const [condition, setCondition] = useState("NEW (SEALED)");
-  const [color, setColor] = useState("NATURAL TITANIUM");
-  const [storage, setStorage] = useState("256GB");
+  const [selectedColor, setSelectedColor] = useState(null);
+  const [selectedStorage, setSelectedStorage] = useState(null);
+  const [selectedRam, setSelectedRam] = useState(null);
   const [quantity, setQuantity] = useState(1);
-  const [activeFaq, setActiveFaq] = useState(0);
+  const [activeFaq, setActiveFaq] = useState(null);
 
-  const images = [
-    "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&q=80&w=1000",
-    "https://images.unsplash.com/photo-1598327105666-5b89351cb315?auto=format&fit=crop&q=80&w=1000",
-    "https://images.unsplash.com/photo-1605236453806-6ff36851218e?auto=format&fit=crop&q=80&w=1000",
-    "https://images.unsplash.com/photo-1585060544812-6b45742d762f?auto=format&fit=crop&q=80&w=1000",
-  ];
+  useEffect(() => {
+    if (!id) return;
+    setLoading(true);
+    setError(null);
+    fetch(`${BASE_URL}/api/public/product/${id}`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to load product");
+        return res.json();
+      })
+      .then((json) => {
+        const data = json.data;
+        setProduct(data);
+        setSelectedColor(data.availableColors?.[0]?.id ?? null);
+        setSelectedStorage(data.availableStorageOptions?.[0]?.id ?? null);
+        setSelectedRam(data.availableRamOptions?.[0]?.id ?? null);
+        setSelectedImage(0);
+      })
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
+  }, [id]);
 
-  const conditions = ["NEW (SEALED)", "Excellent (Like New)", "Very Good"];
-  const colors = [
-    { name: "TITANIUM GRAY", hex: "#b5b2a9" },
-    { name: "NATURAL TITANIUM", hex: "#485055" },
-    { name: "TITANIUM BLACK", hex: "#262626" },
-    { name: "TITANIUM SILVER", hex: "#e8e8e8" },
-  ];
-  const storages = ["256GB", "512GB", "1TB"];
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <span className="loading loading-spinner loading-lg text-custom" />
+      </div>
+    );
+  }
 
-  const faqs = [
-    {
-      q: "What's in the box?",
-      a: "The retail package includes the Samsung Galaxy S26 Ultra 5G, an integrated S Pen, a USB-C to USB-C cable, and a SIM ejection tool. Please note that a wall charger is sold separately.",
-    },
-    {
-      q: "Does it support global 5G networks?",
-      a: "Yes, the device is fully unlocked and supports all major 5G bands globally, ensuring seamless connectivity wherever you go.",
-    },
-    {
-      q: "Warranty Information",
-      a: "This product comes with a standard 1-year manufacturer warranty covering hardware defects. Additional extended warranty options are available at checkout.",
-    },
-  ];
+  if (error || !product) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-red-500">
+        {error || "Product not found."}
+      </div>
+    );
+  }
+
+  const images = [...product.images].sort((a, b) => a.displayOrder - b.displayOrder);
+  const highlights = [...product.highlights].sort((a, b) => a.displayOrder - b.displayOrder);
+  const specifications = [...product.specifications].sort((a, b) => a.displayOrder - b.displayOrder);
 
   return (
     <div className="min-h-screen bg-white pb-20">
@@ -63,46 +73,60 @@ const ProductDetails = () => {
         <div className="flex flex-col lg:flex-row gap-10 lg:gap-14 pt-8 md:pt-12 mb-20">
           {/* Left: Image Gallery */}
           <div className="w-full lg:w-1/2 shrink-0">
-            <div className="rounded-xl overflow-hidden mb-3 aspect-4/3 flex items-center justify-center">
-              <img
-                src={images[selectedImage]}
-                alt="Galaxy S26 Ultra"
-                className="w-full h-full object-cover"
-              />
+            <div className="rounded-xl overflow-hidden mb-3 aspect-4/3 flex items-center justify-center bg-gray-50">
+              {images.length > 0 ? (
+                <img
+                  src={images[selectedImage]?.imageUrl}
+                  alt={product.title}
+                  className="w-full h-full object-contain"
+                />
+              ) : (
+                <span className="text-gray-400 text-sm">No image</span>
+              )}
             </div>
-            <div className="grid grid-cols-4 gap-2 md:gap-3">
-              {images.map((img, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setSelectedImage(idx)}
-                  className={`aspect-4/3 rounded-lg border-2 overflow-hidden transition-all p-0.5 ${
-                    selectedImage === idx
-                      ? "border-custom"
-                      : "border-gray-200 hover:border-gray-300"
-                  }`}
-                >
-                  <img
-                    src={img}
-                    alt={`Thumb ${idx}`}
-                    className="w-full h-full object-cover rounded-md"
-                  />
-                </button>
-              ))}
-            </div>
+            {images.length > 1 && (
+              <div className="grid grid-cols-4 gap-2 md:gap-3">
+                {images.map((img, idx) => (
+                  <button
+                    key={img.id}
+                    onClick={() => setSelectedImage(idx)}
+                    className={`aspect-4/3 rounded-lg border-2 overflow-hidden transition-all p-0.5 ${
+                      selectedImage === idx
+                        ? "border-custom"
+                        : "border-gray-200 hover:border-gray-300"
+                    }`}
+                  >
+                    <img
+                      src={img.imageUrl}
+                      alt={`${product.title} view ${idx + 1}`}
+                      className="w-full h-full object-contain rounded-md bg-gray-50"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Right: Product Details */}
           <div className="w-full lg:w-1/2 flex flex-col justify-start">
             <div className="mb-6">
               <p className="text-sm font-bold tracking-widest text-[#94A3B8] uppercase mb-1">
-                Samsung
+                {product.series?.name}
               </p>
-              <h1 className="text-3xl md:text-4xl lg:text-[42px] xl:text-[56px] font-semibold text-[#151A2A] mb-2 tracking-tight">
-                Galaxy S26 Ultra
+              <h1 className="text-3xl md:text-4xl lg:text-[42px] xl:text-[48px] font-semibold text-[#151A2A] mb-2 tracking-tight">
+                {product.title}
               </h1>
               <p className="text-xl md:text-2xl lg:text-3xl font-bold text-[#151A2A]">
-                $999.00
+                £{Number(product.basePrice).toLocaleString()}
               </p>
+              {product.stockQuantity <= 5 && product.stockQuantity > 0 && (
+                <p className="text-sm text-orange-500 mt-1">
+                  Only {product.stockQuantity} left in stock
+                </p>
+              )}
+              {product.stockQuantity === 0 && (
+                <p className="text-sm text-red-500 mt-1">Out of stock</p>
+              )}
             </div>
 
             {/* Condition */}
@@ -110,74 +134,89 @@ const ProductDetails = () => {
               <p className="text-sm font-bold tracking-widest text-[#151A2A] uppercase mb-2">
                 Condition
               </p>
-              <div className="flex flex-wrap gap-2">
-                {conditions.map((c) => (
-                  <button
-                    key={c}
-                    onClick={() => setCondition(c)}
-                    className={`px-4 py-2 rounded-sm text-[13px] border transition-colors ${
-                      condition === c
-                        ? "border-[#151A2A] text-[#151A2A]"
-                        : "border-gray-300 text-gray-500 hover:border-gray-400"
-                    }`}
-                  >
-                    {c}
-                  </button>
-                ))}
-              </div>
+              <span className="px-4 py-2 rounded-sm text-[13px] border border-[#151A2A] text-[#151A2A] inline-block">
+                {product.condition?.name}
+              </span>
             </div>
 
             {/* Color */}
-            <div className="mb-6">
-              <p className="text-[11px] font-bold tracking-widest text-[#151A2A] uppercase mb-3">
-                COLOR:{" "}
-                <span className="text-[#9CA3AF] font-normal">{color}</span>
-              </p>
-              <div className="flex gap-3">
-                {colors.map((c) => (
-                  <button
-                    key={c.name}
-                    onClick={() => setColor(c.name)}
-                    className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${
-                      color === c.name
-                        ? "ring-[1.5px] ring-gray-400 ring-offset-2"
-                        : "hover:ring-[1.5px] hover:ring-gray-300 hover:ring-offset-1"
-                    }`}
-                  >
-                    <span
-                      className="w-full h-full rounded-full border border-gray-200 shadow-sm"
-                      style={{ backgroundColor: c.hex }}
-                    />
-                  </button>
-                ))}
+            {product.availableColors?.length > 0 && (
+              <div className="mb-6">
+                <p className="text-[11px] font-bold tracking-widest text-[#151A2A] uppercase mb-2">
+                  COLOR:{" "}
+                  <span className="text-[#9CA3AF] font-normal">
+                    {product.availableColors.find((c) => c.id === selectedColor)?.name}
+                  </span>
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {product.availableColors.map((c) => (
+                    <button
+                      key={c.id}
+                      onClick={() => setSelectedColor(c.id)}
+                      className={`px-3 py-1.5 rounded-sm text-[12px] border transition-colors ${
+                        selectedColor === c.id
+                          ? "border-[#151A2A] text-[#151A2A] bg-gray-50"
+                          : "border-gray-300 text-gray-500 hover:border-gray-400"
+                      }`}
+                    >
+                      {c.name}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Storage */}
-            <div className="mb-8">
-              <p className="text-[11px] font-bold tracking-widest text-[#151A2A] uppercase mb-2">
-                Storage
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {storages.map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => setStorage(s)}
-                    className={`w-20 py-2 rounded-sm text-[13px] border transition-colors ${
-                      storage === s
-                        ? "bg-custom border-custom text-white"
-                        : "border-gray-300 text-gray-500 hover:border-gray-400 bg-white"
-                    }`}
-                  >
-                    {s}
-                  </button>
-                ))}
+            {product.availableStorageOptions?.length > 0 && (
+              <div className="mb-4">
+                <p className="text-[11px] font-bold tracking-widest text-[#151A2A] uppercase mb-2">
+                  Storage
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {product.availableStorageOptions.map((s) => (
+                    <button
+                      key={s.id}
+                      onClick={() => setSelectedStorage(s.id)}
+                      className={`px-4 py-2 rounded-sm text-[13px] border transition-colors ${
+                        selectedStorage === s.id
+                          ? "bg-custom border-custom text-white"
+                          : "border-gray-300 text-gray-500 hover:border-gray-400 bg-white"
+                      }`}
+                    >
+                      {s.name}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
+
+            {/* RAM */}
+            {product.availableRamOptions?.length > 0 && (
+              <div className="mb-8">
+                <p className="text-[11px] font-bold tracking-widest text-[#151A2A] uppercase mb-2">
+                  RAM
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {product.availableRamOptions.map((r) => (
+                    <button
+                      key={r.id}
+                      onClick={() => setSelectedRam(r.id)}
+                      className={`px-4 py-2 rounded-sm text-[13px] border transition-colors ${
+                        selectedRam === r.id
+                          ? "bg-custom border-custom text-white"
+                          : "border-gray-300 text-gray-500 hover:border-gray-400 bg-white"
+                      }`}
+                    >
+                      {r.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Actions */}
-            <div className="flex flex-col sm:flex-row gap-3 mb-3">
-              <div className="flex items-center border border-gray-300 rounded-sm px-3 py-2 w-full sm:w-24 justify-between shrink-0 h-11.5">
+            <div className="flex flex-col sm:flex-row gap-3 mb-3 mt-auto">
+              <div className="flex items-center border border-gray-300 rounded-sm px-3 py-2 w-full sm:w-24 justify-between shrink-0 h-11">
                 <button
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
                   className="text-gray-500 hover:text-[#151A2A]"
@@ -190,123 +229,81 @@ const ProductDetails = () => {
                 <button
                   onClick={() => setQuantity(quantity + 1)}
                   className="text-gray-500 hover:text-[#151A2A]"
+                  disabled={product.stockQuantity !== null && quantity >= product.stockQuantity}
                 >
                   <FiPlus size={14} />
                 </button>
               </div>
-              <Link to={"/cart"} className="sm:flex-1 bg-[#47B5C9] hover:bg-[#349eab] text-white rounded-sm font-medium text-sm transition-colors h-11.5 flex items-center justify-center">
+              <Link
+                to="/cart"
+                className="sm:flex-1 bg-[#47B5C9] hover:bg-[#349eab] text-white rounded-sm font-medium text-sm transition-colors h-11 flex items-center justify-center"
+              >
                 Add to Cart
               </Link>
             </div>
-            <Link to={"/checkout"} className="w-full border border-gray-800 text-[#151A2A] hover:bg-gray-50 rounded-sm font-medium text-sm transition-colors h-11.5 flex items-center justify-center">
-              Shop Now
+            <Link
+              to="/checkout"
+              className="w-full border border-gray-800 text-[#151A2A] hover:bg-gray-50 rounded-sm font-medium text-sm transition-colors h-11 flex items-center justify-center"
+            >
+              Buy Now
             </Link>
           </div>
         </div>
 
-        {/* ── MIDDLE SECTION: Introducing ── */}
-        <div className="text-center mb-16 max-w-3xl mx-auto">
-          <h2 className="title-custom text-[#151A2A] mb-4">
-            Introducing the New Galaxy S26 Ultra
-          </h2>
-          <p className="subtitle-custom">
-            The ultimate Ultra experience, enhanced with artificial intelligence
-            and precision engineering for the modern creator.
-          </p>
-        </div>
+        {/* ── INTRODUCTION ── */}
+        {product.introduction && (
+          <div className="text-center mb-16 max-w-3xl mx-auto">
+            <h2 className="title-custom text-[#151A2A] mb-4">
+              About the {product.title}
+            </h2>
+            <p className="subtitle-custom">{product.introduction}</p>
+          </div>
+        )}
 
-        {/* Features Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-24">
-          <div className="bg-[#F0F4F6] rounded-2xl p-8">
-            <HiChip className="text-custom w-6 h-6 mb-4" />
-            <h3 className="text-base font-bold text-[#595E71] mb-2">
-              Snapdragon 8 Elite
-            </h3>
-            <p className="text-sm text-[#64748B] leading-relaxed">
-              The fastest chip ever in a Galaxy, optimized for AAA gaming and
-              heavy multitasking.
-            </p>
+        {/* ── HIGHLIGHTS ── */}
+        {highlights.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-24">
+            {highlights.map((h) => (
+              <div key={h.id} className="bg-[#F0F4F6] rounded-2xl p-8">
+                {h.iconUrl ? (
+                  <img src={h.iconUrl} alt={h.title} className="w-6 h-6 mb-4" />
+                ) : (
+                  <div className="w-6 h-6 mb-4 rounded-full bg-custom/20" />
+                )}
+                <h3 className="text-base font-bold text-[#595E71] mb-2">
+                  {h.title}
+                </h3>
+                <p className="text-sm text-[#64748B] leading-relaxed">
+                  {h.description}
+                </p>
+              </div>
+            ))}
           </div>
-          <div className="bg-[#F0F4F6] rounded-2xl p-8">
-            <MdOutlineCameraAlt className="text-custom w-6 h-6 mb-4" />
-            <h3 className="text-base font-bold text-[#595E71] mb-2">
-              200MP Pro Camera
-            </h3>
-            <p className="text-sm text-[#64748B] leading-relaxed">
-              Capture details that were previously invisible to the human eye,
-              even in low light.
-            </p>
-          </div>
-          <div className="bg-[#F0F4F6] rounded-2xl p-8">
-            <MdOutlineCreate className="text-custom w-6 h-6 mb-4" />
-            <h3 className="text-base font-bold text-[#595E71] mb-2">
-              S Pen Integrated
-            </h3>
-            <p className="text-sm text-[#64748B] leading-relaxed">
-              The legacy lives on. Write, sketch, and navigate with unmatched
-              precision.
-            </p>
-          </div>
-        </div>
+        )}
 
         {/* ── TECHNICAL SPECS ── */}
-        <div className="mb-24">
-          <h2 className="text-xl font-bold text-[#151A2A] mb-8">
-            Technical Specifications
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
-            <div className="bg-[#F0F4F6] px-5 py-3.5 rounded flex justify-between items-center">
-              <span className="text-base text-[#64748B]">Brand</span>
-              <span className="text-base font-medium text-[#171C1E]">
-                Samsung
-              </span>
-            </div>
-            <div className="bg-[#F0F4F6] px-5 py-3.5 rounded flex justify-between items-center">
-              <span className="text-base text-[#64748B]">Network</span>
-              <span className="text-base font-medium text-[#171C1E]">
-                GSM / HSPA / LTE / 5G
-              </span>
-            </div>
-            <div className="bg-[#F0F4F6] px-5 py-3.5 rounded flex justify-between items-center">
-              <span className="text-base text-[#64748B]">Dimensions</span>
-              <span className="text-base font-medium text-[#171C1E]">
-                162.3 x 79.0 x 8.6 mm
-              </span>
-            </div>
-            <div className="bg-[#F0F4F6] px-5 py-3.5 rounded flex justify-between items-center">
-              <span className="text-base text-[#64748B]">Display</span>
-              <span className="text-base font-medium text-[#171C1E]">
-                6.8" Dynamic LTPO AMOLED 2X
-              </span>
-            </div>
-            <div className="bg-[#F0F4F6] px-5 py-3.5 rounded flex justify-between items-center">
-              <span className="text-base text-[#64748B]">Resolution</span>
-              <span className="text-base font-medium text-[#171C1E]">
-                1440 x 3120 pixels
-              </span>
-            </div>
-            <div className="bg-[#F0F4F6] px-5 py-3.5 rounded flex justify-between items-center">
-              <span className="text-base text-[#64748B]">OS</span>
-              <span className="text-base font-medium text-[#171C1E]">
-                Android 15, One UI 7.1
-              </span>
-            </div>
-            <div className="bg-[#F0F4F6] px-5 py-3.5 rounded flex justify-between items-center">
-              <span className="text-base text-[#64748B]">Main Camera</span>
-              <span className="text-base font-medium text-[#171C1E]">
-                200MP + 50MP + 10MP + 12MP
-              </span>
-            </div>
-            <div className="bg-[#F0F4F6] px-5 py-3.5 rounded flex justify-between items-center">
-              <span className="text-base text-[#64748B]">Battery</span>
-              <span className="text-base font-medium text-[#171C1E]">
-                5000 mAh Li-Ion
-              </span>
+        {specifications.length > 0 && (
+          <div className="mb-24">
+            <h2 className="text-xl font-bold text-[#151A2A] mb-8">
+              Technical Specifications
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
+              {specifications.map((spec) => (
+                <div
+                  key={spec.id}
+                  className="bg-[#F0F4F6] px-5 py-3.5 rounded flex justify-between items-center"
+                >
+                  <span className="text-base text-[#64748B]">{spec.name}</span>
+                  <span className="text-base font-medium text-[#171C1E]">
+                    {spec.value}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
-        </div>
+        )}
 
-        {/* ── BOTTOM SECTION: Why Choose & FAQ ── */}
+        {/* ── WHY CHOOSE & FAQ ── */}
         <div className="flex flex-col lg:flex-row gap-10 lg:gap-16">
           {/* Left: Why Choose */}
           <div className="flex-1">
@@ -323,8 +320,8 @@ const ProductDetails = () => {
                     Authentic Products
                   </h3>
                   <p className="text-base text-[#64748B]">
-                    We guarantee 100% genuine Samsung products sourced directly
-                    from authorized channels.
+                    We guarantee 100% genuine products sourced directly from
+                    authorized channels.
                   </p>
                 </div>
               </div>
@@ -346,43 +343,46 @@ const ProductDetails = () => {
           </div>
 
           {/* Right: FAQ */}
-          <div className="flex-1">
-            <h2 className="text-xl font-semibold text-[#151A2A] mb-6">
-              Frequently Asked Questions
-            </h2>
-            <div className="space-y-3">
-              {faqs.map((faq, idx) => (
-                <div
-                  key={idx}
-                  className="border border-gray-200 rounded-lg overflow-hidden bg-white"
-                >
-                  <button
-                    onClick={() => setActiveFaq(activeFaq === idx ? null : idx)}
-                    className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors"
+          {product.faqs?.length > 0 && (
+            <div className="flex-1">
+              <h2 className="text-xl font-semibold text-[#151A2A] mb-6">
+                Frequently Asked Questions
+              </h2>
+              <div className="space-y-3">
+                {product.faqs.map((faq, idx) => (
+                  <div
+                    key={faq.id}
+                    className="border border-gray-200 rounded-lg overflow-hidden bg-white"
                   >
-                    <span className="text-base font-medium text-[#151A2A] pr-4">
-                      {faq.q}
-                    </span>
-                    {activeFaq === idx ? (
-                      <FiChevronUp className="text-gray-400 shrink-0" />
-                    ) : (
-                      <FiChevronDown className="text-gray-400 shrink-0" />
+                    <button
+                      onClick={() => setActiveFaq(activeFaq === idx ? null : idx)}
+                      className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors"
+                    >
+                      <span className="text-base font-medium text-[#151A2A] pr-4">
+                        {faq.question}
+                      </span>
+                      {activeFaq === idx ? (
+                        <FiChevronUp className="text-gray-400 shrink-0" />
+                      ) : (
+                        <FiChevronDown className="text-gray-400 shrink-0" />
+                      )}
+                    </button>
+                    {activeFaq === idx && (
+                      <div className="p-4 pt-0 text-base text-[#64748B] leading-relaxed border-t border-gray-100">
+                        {faq.answer}
+                      </div>
                     )}
-                  </button>
-                  {activeFaq === idx && (
-                    <div className="p-4 pt-0 text-base text-[#64748B] leading-relaxed border-t border-gray-100">
-                      {faq.a}
-                    </div>
-                  )}
-                </div>
-              ))}
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
-        <div className="mt-4">
-          <RelatedProducts />
-        </div>
+        {/* ── RELATED PRODUCTS ── */}
+        {product.relatedProducts?.length > 0 && (
+          <RelatedProducts products={product.relatedProducts} />
+        )}
       </Container>
     </div>
   );

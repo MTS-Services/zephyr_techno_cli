@@ -14,7 +14,7 @@ export default function ProductCard({ product }) {
 
   return (
     <Link
-      to="/product-details"
+      to={`/product-details/${product.id}`}
       className="bg-white border border-gray-100 rounded-2xl overflow-hidden
       transition-all duration-300 group cursor-pointer"
     >

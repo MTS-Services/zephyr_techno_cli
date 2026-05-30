@@ -1,27 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import Card from '../../../home/sections/featured/components/Card';
+import { Link } from 'react-router';
 
-const RelatedProducts = () => {
-    const [data, setData] = useState([]);
+const RelatedProducts = ({ products = [] }) => {
+    const data = products;
     const scrollContainerRef = useRef(null);
     const [showLeftArrow, setShowLeftArrow] = useState(false);
     const [showRightArrow, setShowRightArrow] = useState(true);
-
-    useEffect(() => {
-        let mounted = true;
-
-        fetch('/data/featured.json')
-            .then((res) => res.json())
-            .then((json) => {
-                if (mounted) setData(json);
-            })
-            .catch((err) => console.error('Failed to load featured.json', err));
-
-        return () => {
-            mounted = false;
-        };
-    }, []);
 
     const handleScroll = () => {
         const container = scrollContainerRef.current;
@@ -95,9 +80,22 @@ const RelatedProducts = () => {
                     }}
                 >
                     {data?.map((item) => (
-                        <div key={item.id} className='shrink-0 w-40 sm:w-48 md:w-52'>
-                            <Card {...item} />
-                        </div>
+                        <Link
+                            key={item.id}
+                            to={`/product-details/${item.id}`}
+                            className='shrink-0 w-40 sm:w-48 md:w-52 block group'
+                        >
+                            <div className='rounded-xl overflow-hidden bg-gray-50 aspect-square mb-2'>
+                                <img
+                                    src={item.thumbnail}
+                                    alt={item.title}
+                                    className='w-full h-full object-contain group-hover:scale-105 transition-transform duration-300'
+                                />
+                            </div>
+                            <p className='text-xs text-gray-400 mb-0.5'>{item.series?.name}</p>
+                            <p className='text-sm font-medium text-[#151A2A] truncate'>{item.title}</p>
+                            <p className='text-sm font-bold text-custom'>£{Number(item.basePrice).toLocaleString()}</p>
+                        </Link>
                     ))}
                 </div>
                 <style>{`
