@@ -1,11 +1,11 @@
 import React from "react";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 import Stars from "../../../../products/components/Stars";
 
 const Card = ({ id, title, tag, badgeColor, variant, price, oldPrice, currency, rating, reviews, images }) => {
   return (
     <Link
-      to="/product-details"
+      to={`/product-details/${id}`}
       className="bg-white border border-gray-100 rounded-2xl overflow-hidden
       transition-all duration-300 group cursor-pointer"
     >
@@ -18,7 +18,7 @@ const Card = ({ id, title, tag, badgeColor, variant, price, oldPrice, currency, 
         </span>
         {/* Favorite icon disabled for now */}
 
-        <figure className="hover-gallery">
+        <figure className="">
           {images && images.map((img, index) => (
             <img
               key={index}
