@@ -53,8 +53,8 @@ const AdminOverview = () => {
 
       // Map recent orders
       const mappedOrders = payload.data.recentOrders.map(order => ({
-        name: order.customer.email,
-        product: order.product.title,
+        name: order.customer?.email ?? 'Guest',
+        product: order.product?.title ?? '—',
         amount: `$${order.totalPrice.toLocaleString()}`,
         status: order.status.charAt(0) + order.status.slice(1).toLowerCase(),
         statusColor: getStatusColor(order.status)

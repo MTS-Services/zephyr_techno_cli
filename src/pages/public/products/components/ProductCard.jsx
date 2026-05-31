@@ -56,7 +56,7 @@ export default function ProductCard({ product }) {
               "https://placehold.co/200x200/f3f4f6/94a3b8?text=Phone";
           }}
         /> */}
-        <figure className="hover-gallery ">
+        <figure className="">
           {product.images &&
             product.images.map((img, index) => (
               <img

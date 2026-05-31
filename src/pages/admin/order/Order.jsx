@@ -4,6 +4,7 @@ import AdminDashboardTitle from '../../../components/dashboards/AdminDashboardTi
 import Stats from './components/Stats';
 import OrderTabs from './components/OrderTabs';
 import ViewModal from './components/ViewModal';
+import Pagination from '../listings/components/Pagination';
 
 const API_BASE_URL = import.meta.env.VITE_BASE_URL || 'https://api-zephyr-techno.maktechgroup.tech';
 
@@ -16,11 +17,13 @@ const Order = () => {
     const [statsData, setStatsData] = useState([]);
     const [ordersData, setOrdersData] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
 
     useEffect(() => {
         fetchStats();
-        fetchOrders();
-    }, [activeTab]);
+        fetchOrders(currentPage);
+    }, [activeTab, currentPage]);
 
     useEffect(() => {
         const handleOutsideClick = () => {
@@ -61,11 +64,12 @@ const Order = () => {
         }
     };
 
-    const fetchOrders = async () => {
+    const fetchOrders = async (page = 1) => {
         try {
             setLoading(true);
             const token = localStorage.getItem('token');
-            const res = await fetch(`${API_BASE_URL}/api/admin/orders?page=1&limit=100`, {
+            const statusParam = activeTab !== 'All' ? `&status=${activeTab.toUpperCase()}` : '';
+            const res = await fetch(`${API_BASE_URL}/api/admin/orders?page=${page}&limit=6${statusParam}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             const payload = await res.json();
@@ -74,23 +78,21 @@ const Order = () => {
                 throw new Error(payload.message || 'Failed to fetch orders');
             }
 
-            const mapped = payload.data.map(order => ({
+            const items = Array.isArray(payload.data) ? payload.data : (payload.data?.items ?? []);
+            const meta = payload.meta || payload.data?.meta;
+
+            const mapped = items.map(order => ({
                 id: order.orderId,
                 dbId: order.id,
-                customer: order.user.email,
-                product: order.items[0]?.product.title || 'N/A',
+                customer: order.user?.email ?? 'Guest',
+                product: order.items[0]?.product?.title || 'N/A',
                 price: order.totalPrice,
                 date: new Date(order.createdAt).toLocaleDateString(),
                 status: order.status.charAt(0) + order.status.slice(1).toLowerCase(),
             }));
 
-            // Filter by active tab
-            let filtered = mapped;
-            if (activeTab !== 'All') {
-                filtered = mapped.filter(o => o.status === activeTab);
-            }
-
-            setOrdersData(filtered);
+            setOrdersData(mapped);
+            setTotalPages(meta?.totalPages ?? 1);
             setLoading(false);
         } catch (err) {
             setLoading(false);
@@ -101,6 +103,11 @@ const Order = () => {
                 confirmButtonColor: '#0891b2'
             });
         }
+    };
+
+    const handleTabChange = (tab) => {
+        setActiveTab(tab);
+        setCurrentPage(1);
     };
 
     const statusOptions = ['Processing', 'Delivered', 'Shipped', 'Cancelled'];
@@ -272,7 +279,7 @@ const Order = () => {
 
             <Stats stats={statsData} />
 
-            <OrderTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+            <OrderTabs activeTab={activeTab} setActiveTab={handleTabChange} />
 
             {/* Table */}
             {loading ? (
@@ -401,6 +408,14 @@ const Order = () => {
                 statusOptions={statusOptions}
                 formatOrderPrice={formatOrderPrice}
             />
+
+            {totalPages > 1 && (
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={setCurrentPage}
+                />
+            )}
         </div>
     );
 };
