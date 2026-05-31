@@ -105,7 +105,7 @@ const router = createBrowserRouter([
         element: <Sell />,
       },
       {
-        path: "sell-your-phone",
+        path: "sell-worth",
         element: <SellWorth />,
       },
       {

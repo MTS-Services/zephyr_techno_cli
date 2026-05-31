@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router";
 import {
   CheckCircle,
@@ -58,8 +58,51 @@ const conditions = [
   },
 ];
 
+const STORAGE_KEY = 'sellFlow';
+
 const AboutDevice = () => {
   const [selectedCondition, setSelectedCondition] = useState("excellent");
+  const [apiConditions, setApiConditions] = useState([]);
+  const [device, setDevice] = useState(null);
+  const [price, setPrice] = useState(null);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) setDevice(JSON.parse(raw));
+    } catch (e) {}
+
+    const fetchConditions = async () => {
+      try {
+        const base = import.meta.env.VITE_BASE_URL || '';
+        const res = await fetch(`${base}/api/sell/conditions`);
+        const json = await res.json();
+        if (json?.success && Array.isArray(json.data)) setApiConditions(json.data);
+      } catch (e) {
+        // ignore
+      }
+    };
+
+    fetchConditions();
+  }, []);
+
+  useEffect(() => {
+    const fetchPrice = async () => {
+      if (!selectedCondition || !device?.deviceModelId) return;
+      try {
+        const base = import.meta.env.VITE_BASE_URL || '';
+        const res = await fetch(`${base}/api/sell/price?conditionId=${selectedCondition}&deviceModelId=${device.deviceModelId}`);
+        const json = await res.json();
+        if (json?.success && json.data && json.data.price) {
+          setPrice(json.data.price);
+          const updated = { ...device, conditionId: selectedCondition, baseOfferPrice: json.data.price };
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+        }
+      } catch (e) {}
+    };
+
+    fetchPrice();
+  }, [selectedCondition, device]);
 
   return (
     <div className="bg-[#FBFDFF] min-h-screen py-10 lg:py-16">
@@ -132,9 +175,11 @@ const AboutDevice = () => {
           <div>
             <h3 className="text-lg sm:text-xl font-semibold text-[#171C1E] mb-6">What is the condition?</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {conditions.map((cond) => {
-                const isActive = selectedCondition === cond.id;
-                const isBroken = cond.id === "broken";
+              {(apiConditions.length ? apiConditions : conditions).map((cond) => {
+                const id = cond.id;
+                const name = cond.name || cond.title;
+                const isActive = selectedCondition === id;
+                const isBroken = (cond.name && cond.name.toLowerCase().includes('broken')) || id === 'broken';
 
                 let borderClass = "border-[#BDC9CC] hover:border-custom";
                 let bgClass = "bg-white";
@@ -155,8 +200,8 @@ const AboutDevice = () => {
 
                 return (
                   <div
-                    key={cond.id}
-                    onClick={() => setSelectedCondition(cond.id)}
+                    key={id}
+                    onClick={() => setSelectedCondition(id)}
                     className={`relative rounded-xl p-6 border transition-all cursor-pointer shadow-sm hover:shadow-md flex flex-col ${bgClass} ${borderClass}`}
                   >
                     {isActive && !isBroken && (
@@ -166,28 +211,14 @@ const AboutDevice = () => {
                     )}
 
                     <div className={isActive ? textIconClass : "text-gray-500"}>
-                      {cond.icon}
+                      {/* show static icon if present */}
+                      {cond.icon || null}
                     </div>
 
-                    <h4 className="text-sm font-bold text-[#171C1E] mb-4">
-                      {cond.title}
-                    </h4>
+                    <h4 className="text-sm font-bold text-[#171C1E] mb-4">{name}</h4>
 
                     <ul className="space-y-3 mt-auto">
-                      {cond.bullets.map((bullet, idx) => (
-                        <li key={idx} className="flex items-start gap-2">
-                          <span
-                            className={
-                              isActive ? textIconClass : "text-[#3D494C]"
-                            }
-                          >
-                            •
-                          </span>
-                          <span className="text-sm text-[#3D494C] leading-tight">
-                            {bullet}
-                          </span>
-                        </li>
-                      ))}
+                      <li className="text-sm text-[#3D494C] leading-tight">Select this condition to get an estimated price.</li>
                     </ul>
                   </div>
                 );
@@ -206,7 +237,7 @@ const AboutDevice = () => {
                 Your Estimated Quote
               </p>
               <div className="text-4xl sm:text-5xl text-custom font-light mb-4">
-                $845.00
+                {price ? `£${price}` : '—'}
               </div>
               <p className="text-[#3D494C] text-sm mb-6 max-w-md mx-auto">
                 This price is locked for 7 days. We'll verify the condition upon

@@ -1,22 +1,60 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Package, Truck } from "lucide-react";
+import Swal from 'sweetalert2';
 import Container from "../../../layout/Container";
 
+const STORAGE_KEY = 'sellFlow';
+
 const FinalizeSale = () => {
-  const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
-    phone: "",
-  });
+  const [formData, setFormData] = useState({ fullName: "", email: "", phone: "" });
+  const [submitting, setSubmitting] = useState(false);
+  const [flow, setFlow] = useState(null);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) setFlow(JSON.parse(raw));
+    } catch (e) {}
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert("Request Submitted!");
+    if (!flow) return Swal.fire({ icon: 'error', title: 'Missing device', text: 'Please start the sell flow again.' });
+    setSubmitting(true);
+    try {
+      const base = import.meta.env.VITE_BASE_URL || '';
+      const body = {
+        fullName: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        deviceName: flow.deviceName,
+        deviceModelId: flow.deviceModelId,
+        conditionId: flow.conditionId,
+        baseOfferPrice: parseFloat(flow.baseOfferPrice) || undefined,
+      };
+
+      const res = await fetch(`${base}/api/sell/finalize`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json.message || 'Request failed');
+
+      Swal.fire({ icon: 'success', title: json.message || 'Submitted' });
+      localStorage.removeItem(STORAGE_KEY);
+      setFormData({ fullName: '', email: '', phone: '' });
+    } catch (err) {
+      Swal.fire({ icon: 'error', title: 'Submission failed', text: err.message || 'Please try again.' });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -63,7 +101,7 @@ const FinalizeSale = () => {
             Finalize Your Sale
           </h1>
           <p className="text-[#3D494C] text-base md:text-lg">
-            Complete your details to secure your trade-in price of £445.00.
+            Complete your details to secure your trade-in price of {flow?.baseOfferPrice ? `£${flow.baseOfferPrice}` : '—'}.
           </p>
         </div>
 

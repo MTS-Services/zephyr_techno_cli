@@ -1,25 +1,73 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import Container from "../../../layout/Container";
 import { Link } from "react-router";
 
-const SellWorth = () => {
-  const [selectedCategory, setSelectedCategory] = useState("iPhone");
+const STORAGE_KEY = "sellFlow";
 
-  const categories = [
-    {
-      name: "iPhone",
-      icon: "https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/04047b4a-8c11-4747-bb7c-5086eb5b27d0",
-    },
-    {
-      name: "iPad",
-      icon: "https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/9e055d17-1b68-4dcd-8ed7-e7f00f9774d6",
-    },
-    {
-      name: "Samsung",
-      icon: "https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/0ca94c4d-ce70-45cf-876f-631ffb0ee1c8",
-    },
-  ];
+const SellWorth = () => {
+  const [series, setSeries] = useState([]);
+  const [models, setModels] = useState([]);
+  const [selectedSeries, setSelectedSeries] = useState(null);
+  const [selectedModel, setSelectedModel] = useState(null);
+  const [loadingSeries, setLoadingSeries] = useState(false);
+  const [loadingModels, setLoadingModels] = useState(false);
+  const [showModels, setShowModels] = useState(false);
+  const modelsRef = useRef(null);
+
+  useEffect(() => {
+    // clear previous flow
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch (e) {}
+
+    const fetchSeries = async () => {
+      setLoadingSeries(true);
+      try {
+        const base = import.meta.env.VITE_BASE_URL || '';
+        const res = await fetch(`${base}/api/sell/series`);
+        const json = await res.json();
+        if (json?.success && Array.isArray(json.data)) setSeries(json.data);
+      } catch (e) {}
+      setLoadingSeries(false);
+    };
+
+    fetchSeries();
+  }, []);
+
+  const handleSelectSeries = async (s) => {
+    setSelectedSeries(s);
+    setSelectedModel(null);
+    setModels([]);
+    setLoadingModels(true);
+    try {
+      const base = import.meta.env.VITE_BASE_URL || '';
+      const res = await fetch(`${base}/api/sell/models?seriesId=${s.id}`);
+      const json = await res.json();
+      if (json?.success && Array.isArray(json.data)) setModels(json.data);
+    } catch (e) {}
+    setLoadingModels(false);
+  };
+
+  const onRevealPrice = () => {
+    if (!selectedModel || !selectedSeries) return;
+    const payload = {
+      seriesId: selectedSeries.id,
+      seriesName: selectedSeries.name,
+      deviceModelId: selectedModel.id,
+      deviceName: selectedModel.name,
+    };
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(payload)); } catch (e) {}
+  };
+
+  // close model list when clicking outside
+  useEffect(()=>{
+    const onDocClick = (e) => {
+      if (modelsRef.current && !modelsRef.current.contains(e.target)) setShowModels(false);
+    };
+    document.addEventListener('click', onDocClick);
+    return ()=> document.removeEventListener('click', onDocClick);
+  },[]);
 
   return (
     <div className="bg-[#FBFDFF] min-h-screen py-10 lg:py-16">
@@ -66,45 +114,50 @@ const SellWorth = () => {
           </p>
         </div>
 
-        {/* Categories */}
+        {/* Series */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-3xl mx-auto mb-12">
-          {categories.map((cat) => (
+          {loadingSeries && <div className="col-span-3 text-center">Loading series...</div>}
+          {!loadingSeries && series.map((s) => (
             <button
-              key={cat.name}
-              onClick={() => setSelectedCategory(cat.name)}
+              key={s.id}
+              onClick={() => handleSelectSeries(s)}
               className={`flex flex-col items-center justify-center py-8 rounded-xl border-2 transition-all duration-300 ${
-                selectedCategory === cat.name
+                selectedSeries?.id === s.id
                   ? "border-custom bg-[#F0F4F6] shadow-sm"
                   : "border-transparent bg-[#F0F4F6] hover:border-gray-300"
               }`}
             >
               <div className="bg-white w-12 h-12 rounded-full flex items-center justify-center mb-4 shadow-sm">
-                <img
-                  src={cat.icon}
-                  alt={cat.name}
-                  className="h-6 object-contain"
-                />
+                <span className="text-sm font-semibold">{s.name?.[0] ?? '?'}</span>
               </div>
-              <span className="text-[#2E395B] text-xl font-medium">
-                {cat.name}
-              </span>
+              <span className="text-[#2E395B] text-xl font-medium">{s.name}</span>
             </button>
           ))}
         </div>
 
         {/* Model Selection */}
         <div className="max-w-2xl mx-auto mb-10">
-          <label className="block text-xs font-bold text-[#3D494C] mb-3 uppercase tracking-wide">
-            SELECT YOUR MODEL
-          </label>
-          <div className="relative">
-            <input
-              type="text"
-              readOnly
-              placeholder="Start typing or select from list..."
-              className="w-full bg-white border border-[#BDC9CC] rounded-lg py-4 px-6 text-[#171C1E] text-base outline-none cursor-pointer hover:border-custom transition-colors"
-            />
-            <ChevronDown className="absolute right-6 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400 pointer-events-none" />
+          <label className="block text-xs font-bold text-[#3D494C] mb-3 uppercase tracking-wide">SELECT YOUR MODEL</label>
+          <div className="relative" ref={modelsRef}>
+            <button
+              type="button"
+              onClick={(e)=>{ e.stopPropagation(); setShowModels((s)=>!s); }}
+              className="w-full text-left bg-white border border-[#BDC9CC] rounded-lg py-4 px-6 text-[#171C1E] text-base outline-none hover:border-custom transition-colors flex items-center justify-between"
+            >
+              <span>{selectedModel?.name || 'Start typing or select from list...'}</span>
+              <ChevronDown className="w-6 h-6 text-gray-400" />
+            </button>
+
+            {showModels && (
+              <div className="absolute z-30 left-0 right-0 mt-2 bg-white border border-[#E6E6E6] rounded-lg p-3 shadow-lg">
+                <div className="grid grid-cols-2 gap-3 max-h-60 overflow-auto">
+                  {loadingModels && <div className="col-span-2">Loading models...</div>}
+                  {!loadingModels && models.map((m) => (
+                    <button key={m.id} onClick={()=>{ setSelectedModel(m); setShowModels(false); }} className={`px-3 py-2 rounded-lg border ${selectedModel?.id === m.id ? 'border-custom bg-[#F0F4F6]' : 'border-[#E6E6E6]'}`}>{m.name}</button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -112,6 +165,7 @@ const SellWorth = () => {
         <div className="flex flex-col items-center mb-20">
           <Link
             to={"/confirm-sale"}
+            onClick={onRevealPrice}
             className="w-full sm:w-auto bg-custom text-white text-lg md:text-xl font-semibold py-4 px-12 md:px-32 rounded-lg hover:brightness-110 transition-all duration-300 mb-4 shadow-md cursor-pointer"
           >
             Reveal Price
