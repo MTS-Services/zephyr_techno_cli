@@ -11,6 +11,10 @@ body{
     background-color: #fbfdff;
 }
 
+button, a {
+    cursor: pointer;
+}
+
 :root {
     --products-filter-accent: var(--color-custom);
     --products-filter-track: #d9edf2;
