@@ -46,12 +46,19 @@ export const AuthProvider = ({ children }) => {
   });
 
   const login = async ({ email, password }) => {
+    // Include guestSessionId if user had a guest cart — triggers backend migration
+    const guestSessionId = localStorage.getItem('guestSessionId');
+
     const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({
+        email,
+        password,
+        ...(guestSessionId && { guestSessionId }),
+      }),
     });
 
     let payload = {};
@@ -77,6 +84,11 @@ export const AuthProvider = ({ children }) => {
     if (token) {
       localStorage.setItem('token', token);
       localStorage.setItem('accessToken', token);
+    }
+
+    // Cart migrated to user account on backend — remove guest session
+    if (guestSessionId) {
+      localStorage.removeItem('guestSessionId');
     }
 
     if (user) {

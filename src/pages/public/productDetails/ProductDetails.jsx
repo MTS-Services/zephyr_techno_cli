@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, Link } from "react-router";
+import { useParams, Link, useNavigate } from "react-router";
 import Container from "../../../layout/Container";
 import {
   FiMinus,
@@ -10,14 +10,19 @@ import {
   FiTruck,
 } from "react-icons/fi";
 import RelatedProducts from "./sections/relatedProduct/RelatedProducts";
+import { useCart } from "../../../context/CartContext";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
 const ProductDetails = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { addToCart } = useCart();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [addingToCart, setAddingToCart] = useState(false);
+  const [cartMessage, setCartMessage] = useState('');
 
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedColor, setSelectedColor] = useState(null);
@@ -62,6 +67,36 @@ const ProductDetails = () => {
       </div>
     );
   }
+
+  const handleAddToCart = async (redirectAfter = false) => {
+    setAddingToCart(true);
+    setCartMessage('');
+    try {
+      const result = await addToCart({
+        productId: product.id,
+        colorId: selectedColor || undefined,
+        storageOptionId: selectedStorage || undefined,
+        ramOptionId: selectedRam || undefined,
+        quantity,
+      });
+      if (result.success) {
+        if (redirectAfter) {
+          navigate('/checkout');
+        } else {
+          setCartMessage('Added to cart!');
+          setTimeout(() => setCartMessage(''), 2500);
+        }
+      } else {
+        setCartMessage(result.message || 'Failed to add to cart.');
+        setTimeout(() => setCartMessage(''), 3000);
+      }
+    } catch {
+      setCartMessage('Something went wrong.');
+      setTimeout(() => setCartMessage(''), 3000);
+    } finally {
+      setAddingToCart(false);
+    }
+  };
 
   const images = [...product.images].sort((a, b) => a.displayOrder - b.displayOrder);
   const highlights = [...product.highlights].sort((a, b) => a.displayOrder - b.displayOrder);
@@ -234,19 +269,27 @@ const ProductDetails = () => {
                   <FiPlus size={14} />
                 </button>
               </div>
-              <Link
-                to="/cart"
-                className="sm:flex-1 bg-[#47B5C9] hover:bg-[#349eab] text-white rounded-sm font-medium text-sm transition-colors h-11 flex items-center justify-center"
+              <button
+                onClick={() => handleAddToCart(false)}
+                disabled={addingToCart || product.stockQuantity === 0}
+                className="sm:flex-1 bg-[#47B5C9] hover:bg-[#349eab] text-white rounded-sm font-medium text-sm transition-colors h-11 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                Add to Cart
-              </Link>
+                {addingToCart ? (
+                  <span className="loading loading-spinner loading-xs" />
+                ) : cartMessage ? (
+                  <span className="text-white text-sm">{cartMessage}</span>
+                ) : (
+                  'Add to Cart'
+                )}
+              </button>
             </div>
-            <Link
-              to="/checkout"
-              className="w-full border border-gray-800 text-[#151A2A] hover:bg-gray-50 rounded-sm font-medium text-sm transition-colors h-11 flex items-center justify-center"
+            <button
+              onClick={() => handleAddToCart(true)}
+              disabled={addingToCart || product.stockQuantity === 0}
+              className="w-full border border-gray-800 text-[#151A2A] hover:bg-gray-50 rounded-sm font-medium text-sm transition-colors h-11 flex items-center justify-center disabled:opacity-60 disabled:cursor-not-allowed"
             >
               Buy Now
-            </Link>
+            </button>
           </div>
         </div>
 

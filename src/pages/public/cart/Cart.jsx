@@ -2,60 +2,32 @@ import React, { useState } from 'react';
 import { IoChevronBack } from 'react-icons/io5';
 import { FiMinus, FiPlus, FiTrash2, FiLock, FiTruck, FiShield, FiCornerUpLeft, FiAward } from 'react-icons/fi';
 import { Link } from 'react-router';
+import { useCart } from '../../../context/CartContext';
 
 
 const Cart = () => {
-    const [cartItems, setCartItems] = useState([
-        {
-            id: 1,
-            name: 'Samsung Galaxy S23 FE',
-            color: 'Titanium Blue',
-            storage: '256GB',
-            price: 1099.00,
-            quantity: 1,
-            image: 'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&q=80&w=1000',
-            saveForLater: true,
-            checked: false
-        },
-        {
-            id: 2,
-            name: 'Samsung Galaxy S23 FE Ear Buds',
-            color: 'Midnight Black',
-            price: 199.00,
-            quantity: 1,
-            image: 'https://images.unsplash.com/photo-1598327105666-5b89351cb315?auto=format&fit=crop&q=80&w=1000',
-            saveForLater: true,
-            checked: true
-        }
-    ]);
+    const { cartItems, subtotal, loading, updateCartItem, removeCartItem } = useCart();
+    const [updatingId, setUpdatingId] = useState(null);
+    const [removingId, setRemovingId] = useState(null);
 
-    const [promoCode, setPromoCode] = useState('');
-
-    const updateQuantity = (id, change) => {
-        setCartItems(items =>
-            items.map(item =>
-                item.id === id
-                    ? { ...item, quantity: Math.max(1, item.quantity + change) }
-                    : item
-            )
-        );
+    const updateQuantity = async (id, change) => {
+        const item = cartItems.find(i => i.id === id);
+        if (!item) return;
+        const newQty = Math.max(1, item.quantity + change);
+        if (newQty === item.quantity) return;
+        setUpdatingId(id);
+        await updateCartItem(id, newQty);
+        setUpdatingId(null);
     };
 
-    const toggleCheck = (id) => {
-        setCartItems(items =>
-            items.map(item =>
-                item.id === id ? { ...item, checked: !item.checked } : item
-            )
-        );
+    const removeItem = async (id) => {
+        setRemovingId(id);
+        await removeCartItem(id);
+        setRemovingId(null);
     };
 
-    const removeItem = (id) => {
-        setCartItems(items => items.filter(item => item.id !== id));
-    };
-
-    const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const tax = 167.76;
-    const shipping = 0;
+    const TAX_RATE = 0.13;
+    const tax = subtotal * TAX_RATE;
     const total = subtotal + tax;
 
     return (
@@ -66,43 +38,77 @@ const Cart = () => {
                     Your Cart ({cartItems.length} items)
                 </h1>
 
+                {loading ? (
+                    <div className="flex justify-center py-24">
+                        <span className="loading loading-spinner loading-lg text-custom"></span>
+                    </div>
+                ) : cartItems.length === 0 ? (
+                    <div className="flex flex-col items-center gap-6 py-24 text-center">
+                        <p className="text-gray-500 text-lg">Your cart is empty.</p>
+                        <Link to="/products" className="bg-[#47B5C9] hover:bg-[#349eab] text-white px-8 py-3 rounded-md text-[15px] font-medium transition-colors">
+                            Shop Now
+                        </Link>
+                    </div>
+                ) : (
                 <div className="flex flex-col lg:flex-row gap-10 lg:gap-16">
                     {/* Main Cart Items */}
                     <div className="flex-1">
                         <div className="border-t border-gray-200">
-                            {cartItems.map((item, index) => (
+                            {cartItems.map((item) => (
                                 <div key={item.id} className="flex items-start gap-4 py-8 border-b border-gray-200">
-                                    <input 
-                                        type="checkbox" 
-                                        className="w-4.5 h-4.5 mt-10.5 rounded border-gray-300 text-[#47B5C9] focus:ring-[#47B5C9] accent-[#47B5C9] cursor-pointer" 
-                                        checked={item.checked}
-                                        onChange={() => toggleCheck(item.id)}
-                                    />
-                                    
-                                    <div className="w-24 h-28 shrink-0 flex items-center justify-center p-2">
-                                        <img src={item.image} alt={item.name} className="max-w-full max-h-full object-contain rounded" />
+                                    <div className="w-24 h-28 shrink-0 flex items-center justify-center p-2 bg-gray-50 rounded">
+                                        {item.thumbnail || item.image ? (
+                                            <img
+                                                src={item.thumbnail || item.image}
+                                                alt={item.title}
+                                                className="max-w-full max-h-full object-contain"
+                                            />
+                                        ) : (
+                                            <div className="w-full h-full bg-gray-100 rounded" />
+                                        )}
                                     </div>
                                     
                                     <div className="flex-1 flex flex-col md:flex-row justify-between">
                                         {/* Left Info */}
                                         <div className="flex flex-col justify-center">
-                                            <h3 className="text-lg font-semibold text-gray-900 tracking-tight">{item.name}</h3>
-                                            <p className="text-[13px] text-gray-500 mt-1">{item.color} {item.storage ? `/ ${item.storage}` : ''}</p>
+                                            <h3 className="text-lg font-semibold text-gray-900 tracking-tight">{item.title}</h3>
+                                            <p className="text-[13px] text-gray-500 mt-1">
+                                                {item.selectedOptions?.color?.name ?? item.selectedOptions?.color ?? ''}
+                                                {item.selectedOptions?.storage?.name ?? item.selectedOptions?.storage ? ` / ${item.selectedOptions?.storage?.name ?? item.selectedOptions?.storage}` : ''}
+                                                {item.selectedOptions?.ram?.name ?? item.selectedOptions?.ram ? ` / ${item.selectedOptions?.ram?.name ?? item.selectedOptions?.ram}` : ''}
+                                            </p>
                                             <div className="mt-5 flex items-center border border-gray-300 rounded-sm px-2 py-1 w-fit">
-                                                <button onClick={() => updateQuantity(item.id, -1)} className="text-gray-500 hover:text-gray-700 w-6 flex justify-center"><FiMinus size={14}/></button>
-                                                <span className="w-8 text-center text-sm font-medium text-gray-700">{item.quantity}</span>
-                                                <button onClick={() => updateQuantity(item.id, 1)} className="text-gray-500 hover:text-gray-700 w-6 flex justify-center"><FiPlus size={14}/></button>
+                                                <button
+                                                    onClick={() => updateQuantity(item.id, -1)}
+                                                    disabled={updatingId === item.id}
+                                                    className="text-gray-500 hover:text-gray-700 w-6 flex justify-center disabled:opacity-40"
+                                                >
+                                                    <FiMinus size={14}/>
+                                                </button>
+                                                <span className="w-8 text-center text-sm font-medium text-gray-700">
+                                                    {updatingId === item.id ? '…' : item.quantity}
+                                                </span>
+                                                <button
+                                                    onClick={() => updateQuantity(item.id, 1)}
+                                                    disabled={updatingId === item.id}
+                                                    className="text-gray-500 hover:text-gray-700 w-6 flex justify-center disabled:opacity-40"
+                                                >
+                                                    <FiPlus size={14}/>
+                                                </button>
                                             </div>
                                         </div>
                                         
                                         {/* Right Info */}
                                         <div className="flex flex-row md:flex-col items-center md:items-end justify-between mt-4 md:mt-0">
                                             <span className="text-[17px] font-medium text-gray-900">
-                                                ${(item.price * item.quantity).toLocaleString('en-US', {minimumFractionDigits: 2})}
+                                                ${(item.total ?? (item.price * item.quantity)).toLocaleString('en-US', {minimumFractionDigits: 2})}
                                             </span>
                                             <div className="flex items-center gap-4">
-                                                <button className="text-[13px] text-[#47B5C9] hover:underline font-medium">Save for later</button>
-                                                <button onClick={() => removeItem(item.id)} className="text-[#f05252] hover:text-red-700 transition-colors">
+                                                <button
+                                                    onClick={() => removeItem(item.id)}
+                                                    disabled={removingId === item.id}
+                                                    className="text-[#f05252] hover:text-red-700 transition-colors disabled:opacity-40"
+                                                >
                                                     <FiTrash2 className="w-4.5 h-4.5"/>
                                                 </button>
                                             </div>
@@ -113,10 +119,10 @@ const Cart = () => {
                         </div>
                         
                         <div className="mt-8">
-                            <button className="flex items-center gap-2 text-[14px] text-[#47B5C9] font-medium hover:text-[#349eab] transition-colors">
+                            <Link to="/products" className="flex items-center gap-2 text-[14px] text-[#47B5C9] font-medium hover:text-[#349eab] transition-colors">
                                 <IoChevronBack size={16} />
                                 Continue Shopping
-                            </button>
+                            </Link>
                         </div>
                     </div>
 
@@ -140,24 +146,11 @@ const Cart = () => {
                                 </div>
                             </div>
                             
-                            <div className="flex gap-3 mb-6">
-                                <input 
-                                    type="text" 
-                                    placeholder="Promo code" 
-                                    className="flex-1 border border-gray-300 bg-white rounded-md px-4 py-2.5 text-[14px] focus:outline-none focus:border-[#47B5C9] focus:ring-1 focus:ring-[#47B5C9]"
-                                    value={promoCode}
-                                    onChange={(e) => setPromoCode(e.target.value)}
-                                />
-                                <button className="bg-[#1C2337] text-white px-6 py-2.5 rounded-md text-[14px] font-medium hover:bg-gray-800 transition-colors">
-                                    Apply
-                                </button>
-                            </div>
-                            
                             <div className="border-t border-gray-200 pt-5 mb-8">
                                 <div className="flex justify-between items-center">
                                     <span className="text-gray-900 font-medium text-[15px]">Total</span>
                                     <span className="text-[28px] font-bold text-gray-900 tracking-tight">
-                                        {total.toLocaleString('en-US', {minimumFractionDigits: 2})}
+                                        ${total.toLocaleString('en-US', {minimumFractionDigits: 2})}
                                     </span>
                                 </div>
                             </div>
@@ -169,6 +162,7 @@ const Cart = () => {
                         </div>
                     </div>
                 </div>
+                )}
 
                 {/* Features below */}
                 <div className="mt-20 pt-16 border-t border-gray-200">

@@ -1,15 +1,35 @@
 import { useState } from "react";
 import { Link } from "react-router";
 import Stars from "./Stars";
+import { useCart } from "../../../../context/CartContext";
 
 export default function ProductCard({ product }) {
-  const [added, setAdded] = useState(false);
+  const [status, setStatus] = useState('idle'); // idle | loading | added | error
+  const { addToCart } = useCart();
 
-  const handleAdd = (e) => {
+  const handleAdd = async (e) => {
     e.preventDefault();
     e.stopPropagation();
-    setAdded(true);
-    setTimeout(() => setAdded(false), 2000);
+    if (status === 'loading') return;
+    setStatus('loading');
+    try {
+      const result = await addToCart({
+        productId: product.id,
+        quantity: 1,
+        ...(product.colorIds?.length && { colorId: product.colorIds[0] }),
+        ...(product.storageOptionIds?.length && { storageOptionId: product.storageOptionIds[0] }),
+        ...(product.ramOptionIds?.length && { ramOptionId: product.ramOptionIds[0] }),
+      });
+      if (result?.success) {
+        setStatus('added');
+      } else {
+        setStatus('error');
+      }
+    } catch {
+      setStatus('error');
+    } finally {
+      setTimeout(() => setStatus('idle'), 2200);
+    }
   };
 
   return (
@@ -74,9 +94,12 @@ export default function ProductCard({ product }) {
         </div>
         <button
           onClick={handleAdd}
-          className={`mt-3 w-full bg-custom active:scale-95 text-white py-2 rounded-lg text-sm cursor-pointer font-medium transition-all duration-300`}
+          disabled={status === 'loading'}
+          className={`mt-3 w-full active:scale-95 text-white py-2 rounded-lg text-sm cursor-pointer font-medium transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed ${
+            status === 'added' ? 'bg-green-500' : status === 'error' ? 'bg-red-400' : 'bg-custom'
+          }`}
         >
-          {added ? "✓ Added!" : "Add to Cart"}
+          {status === 'loading' ? '...' : status === 'added' ? '✓ Added!' : status === 'error' ? 'Try Again' : 'Add to Cart'}
         </button>
       </div>
     </Link>

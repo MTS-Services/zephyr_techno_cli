@@ -468,6 +468,9 @@ export default function Products() {
       rating: 4.5,
       reviews: 0,
       images: apiProduct.thumbnail ? [apiProduct.thumbnail] : [],
+      colorIds: apiProduct.colorIds || [],
+      storageOptionIds: apiProduct.storageOptionIds || [],
+      ramOptionIds: apiProduct.ramOptionIds || [],
     };
   };
 
