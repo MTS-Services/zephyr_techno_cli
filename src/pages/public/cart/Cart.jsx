@@ -26,9 +26,7 @@ const Cart = () => {
         setRemovingId(null);
     };
 
-    const TAX_RATE = 0.13;
-    const tax = subtotal * TAX_RATE;
-    const total = subtotal + tax;
+    const total = subtotal;
 
     return (
         <div className="bg-white min-h-screen pb-20 font-sans">
@@ -139,10 +137,6 @@ const Cart = () => {
                                 <div className="flex justify-between text-[14px]">
                                     <span className="text-gray-500">Shipping</span>
                                     <span className="text-[#47B5C9]">Free</span>
-                                </div>
-                                <div className="flex justify-between text-[14px]">
-                                    <span className="text-gray-500">Estimated Tax</span>
-                                    <span className="text-gray-600">${tax.toLocaleString('en-US', {minimumFractionDigits: 2})}</span>
                                 </div>
                             </div>
                             
