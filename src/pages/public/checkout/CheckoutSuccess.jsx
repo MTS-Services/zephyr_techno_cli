@@ -63,7 +63,7 @@ const CheckoutSuccess = () => {
     return (
         <div className="min-h-screen bg-white">
             <Container>
-                <div className="max-w-2xl mx-auto py-16">
+                <div className="max-w-xl mx-auto py-16">
                     {/* Success Header */}
                     <div className="flex flex-col items-center gap-4 text-center mb-12">
                         <FiCheckCircle className="w-20 h-20 text-[#47B5C9]" strokeWidth={1.5} />
