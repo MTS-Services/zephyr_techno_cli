@@ -1,11 +1,21 @@
-import { getOrCreateGuestSessionId, clearGuestSessionId } from './guestSession';
+import { getOrCreateGuestSessionId, getGuestSessionId, clearGuestSessionId } from './guestSession';
 
 const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://api-zephyr-techno.maktechgroup.tech';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function getAccessToken() {
-  return localStorage.getItem('accessToken');
+  return (
+    localStorage.getItem('accessToken') ||
+    localStorage.getItem('token') ||
+    (() => {
+      try {
+        return JSON.parse(localStorage.getItem('auth') || '{}').token || null;
+      } catch {
+        return null;
+      }
+    })()
+  );
 }
 
 function isLoggedIn() {
@@ -21,6 +31,25 @@ function authHeaders() {
 
 function guestHeaders() {
   return { 'Content-Type': 'application/json' };
+}
+
+// ─── Cart Migration (guest → authenticated) ──────────────────────────────────
+
+export async function migrateGuestCart(token) {
+  const guestSessionId = getGuestSessionId();
+  if (!guestSessionId || !token) return;
+  try {
+    await fetch(`${BASE_URL}/api/cart/migrate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ guestSessionId }),
+    });
+  } finally {
+    clearGuestSessionId();
+  }
 }
 
 // ─── Cart Operations ──────────────────────────────────────────────────────────

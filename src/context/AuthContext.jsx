@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useMemo, useState } from 'react';
 import { normalizeRole } from '../utils/roles';
+import { getGuestSessionId, clearGuestSessionId } from '../utils/guestSession';
+import { migrateGuestCart } from '../utils/cartApi';
 
 const AuthContext = createContext(null);
 
@@ -46,19 +48,14 @@ export const AuthProvider = ({ children }) => {
   });
 
   const login = async ({ email, password }) => {
-    // Include guestSessionId if user had a guest cart — triggers backend migration
-    const guestSessionId = localStorage.getItem('guestSessionId');
+    const guestSessionId = getGuestSessionId();
 
     const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        email,
-        password,
-        ...(guestSessionId && { guestSessionId }),
-      }),
+      body: JSON.stringify({ email, password }),
     });
 
     let payload = {};
@@ -86,9 +83,11 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('accessToken', token);
     }
 
-    // Cart migrated to user account on backend — remove guest session
-    if (guestSessionId) {
-      localStorage.removeItem('guestSessionId');
+    // Migrate guest cart → user cart via dedicated endpoint, then clear session
+    if (guestSessionId && token) {
+      await migrateGuestCart(token);
+    } else if (guestSessionId) {
+      clearGuestSessionId();
     }
 
     if (user) {
