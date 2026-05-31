@@ -137,12 +137,12 @@ const CheckoutSuccess = () => {
                         >
                             Continue Shopping
                         </Link>
-                        <Link
+                        {/* <Link
                             to="/dashboard/user"
                             className="flex-1 text-center border border-gray-300 hover:border-gray-400 text-gray-700 py-3 rounded-md text-[15px] font-medium transition-colors"
                         >
                             View My Orders
-                        </Link>
+                        </Link> */}
                     </div>
                 </div>
             </Container>
