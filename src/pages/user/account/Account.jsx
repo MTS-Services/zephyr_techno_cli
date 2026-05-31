@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { User } from 'lucide-react';
+import { User, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 import Swal from 'sweetalert2';
 
@@ -29,6 +29,9 @@ const Account = () => {
         newPass: '',
         confirm: '',
     });
+    const [showCurrent, setShowCurrent] = useState(false);
+    const [showNew, setShowNew] = useState(false);
+    const [showConfirm, setShowConfirm] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
@@ -357,38 +360,68 @@ const Account = () => {
                 <form onSubmit={changePassword} className="grid grid-cols-1 gap-4">
                     <div>
                         <label className="mb-1 block text-xs font-medium text-gray-600">Current Password</label>
-                        <input
-                            name="current"
-                            type="password"
-                            value={passwords.current}
-                            onChange={handlePasswordChange}
-                            placeholder="Enter current password"
-                            className="w-full rounded border border-gray-200 px-3 py-2 text-sm"
-                        />
+                        <div className="relative">
+                            <input
+                                name="current"
+                                type={showCurrent ? 'text' : 'password'}
+                                value={passwords.current}
+                                onChange={handlePasswordChange}
+                                placeholder="Enter current password"
+                                className="w-full rounded border border-gray-200 px-3 py-2 text-sm pr-10"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowCurrent((s) => !s)}
+                                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                                aria-label={showCurrent ? 'Hide current password' : 'Show current password'}
+                            >
+                                {showCurrent ? <EyeOff size={16} /> : <Eye size={16} />}
+                            </button>
+                        </div>
                     </div>
 
                     <div>
                         <label className="mb-1 block text-xs font-medium text-gray-600">New Password</label>
-                        <input
-                            name="newPass"
-                            type="password"
-                            value={passwords.newPass}
-                            onChange={handlePasswordChange}
-                            className="w-full rounded border border-gray-200 px-3 py-2 text-sm"
-                            placeholder="Enter new password"
-                        />
+                        <div className="relative">
+                            <input
+                                name="newPass"
+                                type={showNew ? 'text' : 'password'}
+                                value={passwords.newPass}
+                                onChange={handlePasswordChange}
+                                className="w-full rounded border border-gray-200 px-3 py-2 text-sm pr-10"
+                                placeholder="Enter new password"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowNew((s) => !s)}
+                                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                                aria-label={showNew ? 'Hide new password' : 'Show new password'}
+                            >
+                                {showNew ? <EyeOff size={16} /> : <Eye size={16} />}
+                            </button>
+                        </div>
                     </div>
 
                     <div>
                         <label className="mb-1 block text-xs font-medium text-gray-600">Confirm Password</label>
-                        <input
-                            name="confirm"
-                            type="password"
-                            value={passwords.confirm}
-                            onChange={handlePasswordChange}
-                            placeholder="Confirm new password"
-                            className="w-full rounded border border-gray-200 px-3 py-2 text-sm"
-                        />
+                        <div className="relative">
+                            <input
+                                name="confirm"
+                                type={showConfirm ? 'text' : 'password'}
+                                value={passwords.confirm}
+                                onChange={handlePasswordChange}
+                                placeholder="Confirm new password"
+                                className="w-full rounded border border-gray-200 px-3 py-2 text-sm pr-10"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowConfirm((s) => !s)}
+                                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                                aria-label={showConfirm ? 'Hide confirm password' : 'Show confirm password'}
+                            >
+                                {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
+                            </button>
+                        </div>
                     </div>
 
                     <div>

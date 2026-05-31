@@ -1,10 +1,35 @@
+function getPageItems(currentPage, totalPages) {
+  if (totalPages <= 6) {
+    return Array.from({ length: totalPages }, (_, i) => i + 1);
+  }
+
+  const items = [];
+  // always include first page
+  items.push(1);
+
+  // determine window
+  const left = Math.max(2, currentPage - 1);
+  const right = Math.min(totalPages - 1, currentPage + 1);
+
+  if (left > 2) items.push('...');
+
+  for (let i = left; i <= right; i++) items.push(i);
+
+  if (right < totalPages - 1) items.push('...');
+
+  items.push(totalPages);
+
+  return items;
+}
+
 export default function Pagination({ currentPage, totalPages, onPageChange }) {
+  const pageItems = getPageItems(currentPage, totalPages);
+
   const handlePrev = () => onPageChange(Math.max(1, currentPage - 1));
   const handleNext = () => onPageChange(Math.min(totalPages, currentPage + 1));
 
   return (
     <div className="flex items-center justify-center gap-1.5 mt-10">
-      {/* Prev */}
       <button
         onClick={handlePrev}
         disabled={currentPage === 1}
@@ -15,37 +40,25 @@ export default function Pagination({ currentPage, totalPages, onPageChange }) {
         </svg>
       </button>
 
-      {/* Pages */}
-      {[1, 2, 3].map((n) => (
-        <button
-          key={n}
-          onClick={() => onPageChange(n)}
-          className={`w-8 h-8 rounded-lg text-sm font-medium border transition-all
-          ${
-            currentPage === n
-              ? "bg-custom border-custom text-white"
-              : "bg-white border-gray-200 text-gray-600 hover:border-custom"
-          }`}
-        >
-          {n}
-        </button>
-      ))}
+      {pageItems.map((item, idx) =>
+        item === '...' ? (
+          <span key={`ellipsis-${idx}`} className="text-gray-400 text-sm px-1">...</span>
+        ) : (
+          <button
+            key={item}
+            onClick={() => onPageChange(item)}
+            className={`w-8 h-8 rounded-lg text-sm font-medium border transition-all
+              ${
+                currentPage === item
+                  ? 'bg-custom border-custom text-white'
+                  : 'bg-white border-gray-200 text-gray-600 hover:border-custom'
+              }`}
+          >
+            {item}
+          </button>
+        )
+      )}
 
-      <span className="text-gray-400 text-sm px-1">...</span>
-
-      <button
-        onClick={() => onPageChange(8)}
-        className={`w-8 h-8 rounded-lg text-sm font-medium border transition-all
-        ${
-          currentPage === 8
-            ? "bg-custom border-custom text-white"
-            : "bg-white border-gray-200 text-gray-600 hover:border-custom"
-        }`}
-      >
-        8
-      </button>
-
-      {/* Next */}
       <button
         onClick={handleNext}
         disabled={currentPage === totalPages}
