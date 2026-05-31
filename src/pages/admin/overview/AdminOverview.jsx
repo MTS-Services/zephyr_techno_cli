@@ -53,7 +53,9 @@ const AdminOverview = () => {
 
       // Map recent orders
       const mappedOrders = payload.data.recentOrders.map(order => ({
-        name: order.customer?.email ?? 'Guest',
+        name: order.customer?.email
+          ? `${order.customer.email}${order.customer?.isGuest ? ' (Guest)' : ''}`
+          : 'Guest',
         product: order.product?.title ?? '—',
         amount: `$${order.totalPrice.toLocaleString()}`,
         status: order.status.charAt(0) + order.status.slice(1).toLowerCase(),
@@ -143,8 +145,8 @@ const AdminOverview = () => {
       bg: "bg-yellow-50",
     },
     {
-      label: "Pending Orders",
-      value: overviewData.pendingOrders.toString(),
+      label: "Processing Orders",
+      value: overviewData.processingOrders.toString(),
       icon: Clock,
       color: "text-cyan-500",
       bg: "bg-cyan-50",

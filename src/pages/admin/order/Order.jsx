@@ -22,7 +22,7 @@ const Order = () => {
 
     useEffect(() => {
         fetchStats();
-        fetchOrders(currentPage);
+        fetchOrders(currentPage, activeTab);
     }, [activeTab, currentPage]);
 
     useEffect(() => {
@@ -64,11 +64,11 @@ const Order = () => {
         }
     };
 
-    const fetchOrders = async (page = 1) => {
+    const fetchOrders = async (page = 1, tab = 'All') => {
         try {
             setLoading(true);
             const token = localStorage.getItem('token');
-            const statusParam = activeTab !== 'All' ? `&status=${activeTab.toUpperCase()}` : '';
+            const statusParam = tab !== 'All' ? `&status=${tab.toUpperCase()}` : '';
             const res = await fetch(`${API_BASE_URL}/api/admin/orders?page=${page}&limit=6${statusParam}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -155,7 +155,9 @@ const Order = () => {
     const handleStatusChange = async (order, newStatus) => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`${API_BASE_URL}/api/admin/orders/${order.dbId}/status`, {
+            const dbId = order?.dbId ?? order?.id ?? order?._id;
+            if (!dbId) throw new Error('Order id is missing');
+            const res = await fetch(`${API_BASE_URL}/api/admin/orders/${dbId}/status`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
@@ -169,6 +171,10 @@ const Order = () => {
                 throw new Error(payload.message || 'Failed to update status');
             }
 
+            // Close details modal immediately so the SweetAlert appears without overlap
+            setIsDetailsModalOpen(false);
+            setSelectedOrder(null);
+
             await Swal.fire({
                 icon: 'success',
                 title: 'Success',
@@ -177,7 +183,7 @@ const Order = () => {
                 showConfirmButton: false
             });
 
-            fetchOrders();
+            fetchOrders(currentPage, activeTab);
             fetchStats();
             setOpenActionMenu(null);
 
@@ -251,7 +257,7 @@ const Order = () => {
                 showConfirmButton: false
             });
 
-            fetchOrders();
+            fetchOrders(currentPage, activeTab);
             fetchStats();
             setOpenActionMenu(null);
 

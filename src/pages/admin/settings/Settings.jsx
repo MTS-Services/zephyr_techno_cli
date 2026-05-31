@@ -638,11 +638,11 @@ const Settings = () => {
 
     const renderSection = (section) => (
         <SettingsCard
-            key={section.key}
-            title={section.title}
-            onAdd={() => handleOpenModal(section)}
-            addLabel={section.addLabel}
-        >
+                key={section.key}
+                title={section.title}
+                onAdd={section.key === 'categories' ? undefined : () => handleOpenModal(section)}
+                addLabel={section.addLabel}
+            >
             <div className="flex flex-wrap gap-2">
                 {settings[section.key].map((item, index) => {
                     const isString = typeof item === 'string';

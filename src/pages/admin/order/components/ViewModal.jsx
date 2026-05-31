@@ -50,7 +50,7 @@ const ViewModal = ({
                         </div>
                         <p className="text-base font-bold text-gray-900">{shippingAddr.fullName}</p>
                         <p className="mt-1 text-sm text-gray-600">{shippingAddr.phone}</p>
-                        <p className="mt-0.5 text-sm text-gray-600">{selectedOrder.user.email}</p>
+                        <p className="mt-0.5 text-sm text-gray-600">{selectedOrder.user?.email ?? 'Guest'}</p>
                         <p className="mt-0.5 text-sm leading-snug text-gray-600">{fullAddress}</p>
                     </div>
 
