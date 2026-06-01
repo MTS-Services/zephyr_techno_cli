@@ -19,6 +19,14 @@ const AddModal = ({ title, isOpen, fields, values, onChange, onSubmit, onClose }
                             options={field.options || []}
                             placeholder={field.placeholder || 'Select...'}
                         />
+                    ) : field.type === 'file' ? (
+                        <TextInput
+                            name={field.name}
+                            type={field.type}
+                            placeholder={field.placeholder}
+                            accept={field.accept}
+                            onChange={onChange}
+                        />
                     ) : (
                         <TextInput
                             name={field.name}

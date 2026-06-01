@@ -59,6 +59,7 @@ const Settings = () => {
                 const normalized = data.map((s) => ({
                     value: s.id || s._id || s.uuid || s?.value || String(s),
                     label: s.name || s.title || s.value || String(s),
+                    image: s.image || null,
                 }));
 
                 setSettings((prev) => ({ ...prev, series: normalized }));
@@ -238,7 +239,16 @@ const Settings = () => {
     const sections = SECTIONS(settings);
 
     const handleOpenModal = (section) => {
-        setActiveSection(section);
+        // Add image field for series
+        if (section.key === 'series') {
+            const fields = [
+                { name: 'value', label: 'Series Name', type: 'text', placeholder: 'Enter series name' },
+                { name: 'image', label: 'Series Image', type: 'file', accept: 'image/*' },
+            ];
+            setActiveSection({ ...section, fields, modalTitle: 'Add Series', valueKey: 'value' });
+        } else {
+            setActiveSection(section);
+        }
         setModalValues({});
     };
 
@@ -248,8 +258,12 @@ const Settings = () => {
     };
 
     const handleModalChange = (e) => {
-        const { name, value } = e.target;
-        setModalValues((prev) => ({ ...prev, [name]: value }));
+        const { name, value, type, files } = e.target;
+        if (type === 'file') {
+            setModalValues((prev) => ({ ...prev, [name]: files?.[0] || null }));
+        } else {
+            setModalValues((prev) => ({ ...prev, [name]: value }));
+        }
     };
 
     const handleModalSubmit = () => {
@@ -270,20 +284,36 @@ const Settings = () => {
                 try {
                     const token = localStorage.getItem('token');
                     const endpoint = `${API_BASE_URL}/api/admin/attributes/${activeSection.key}`;
-                    const body =
-                        activeSection.key === 'models'
+                    
+                    let body, headers;
+                    if (activeSection.key === 'series' && modalValues.image) {
+                        // Use FormData for file upload
+                        body = new FormData();
+                        body.append('name', modalValues.value || newValue);
+                        body.append('image', modalValues.image);
+                        headers = {
+                            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                        };
+                    } else {
+                        headers = {
+                            'Content-Type': 'application/json',
+                            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                        };
+                        body = activeSection.key === 'models'
                             ? {
                                   name: modalValues.modelName,
                                   seriesId: modalValues.seriesId,
                               }
+                            : activeSection.key === 'series'
+                            ? { name: modalValues.value || newValue }
                             : { name: newValue };
+                        body = JSON.stringify(body);
+                    }
+                    
                     const res = await fetch(endpoint, {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-                        },
-                        body: JSON.stringify(body),
+                        headers,
+                        body,
                     });
 
                     if (!res.ok) {
@@ -300,8 +330,12 @@ const Settings = () => {
                         const item = { id, name };
                         setSettings((prev) => ({ ...prev, categories: [...prev.categories, item] }));
                     } else if (activeSection.key === 'series') {
-                        // series: normalize to { value, label } for SelectInput
-                        const item = { value: id || name, label: name };
+                        // series: normalize to { value, label, image } for SelectInput
+                        const item = {
+                            value: id || name,
+                            label: name,
+                            image: created.image || null,
+                        };
                         setSettings((prev) => ({ ...prev, series: [...prev.series, item] }));
                     } else if (activeSection.key === 'conditions') {
                         const item = { id, name };
