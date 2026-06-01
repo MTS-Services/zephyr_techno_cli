@@ -127,8 +127,12 @@ const SellWorth = () => {
                   : "border-transparent bg-[#F0F4F6] hover:border-gray-300"
               }`}
             >
-              <div className="bg-white w-12 h-12 rounded-full flex items-center justify-center mb-4 shadow-sm">
-                <span className="text-sm font-semibold">{s.name?.[0] ?? '?'}</span>
+              <div className=" w-20 h-20 flex items-center justify-center mb-4  overflow-hidden">
+                {s.image ? (
+                  <img src={s.image} alt={s.name} className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-sm font-semibold">{s.name?.[0] ?? '?'}</span>
+                )}
               </div>
               <span className="text-[#2E395B] text-xl font-medium">{s.name}</span>
             </button>
