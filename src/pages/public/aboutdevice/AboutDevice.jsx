@@ -159,16 +159,16 @@ const AboutDevice = () => {
               <div className="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center p-2">
                 <img
                   src="https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/0f3789cd-e206-44ac-9094-96491b1244bf"
-                  alt="iPhone 15 Pro Max"
+                  alt={device?.deviceName || 'Device'}
                   className="object-contain h-full w-full"
                 />
               </div>
-              <h2 className="text-xl font-bold text-[#171C1E]">iPhone 15 Pro Max</h2>
+              <h2 className="text-xl font-bold text-[#171C1E]">{device?.deviceName || 'Select Device'}</h2>
             </div>
-            <button className="flex items-center gap-2 text-custom font-bold text-sm hover:underline cursor-pointer">
+            <Link to="/sell-worth" className="flex items-center gap-2 text-custom font-bold text-sm hover:underline cursor-pointer">
               Change
               <PenLine className="w-4 h-4" />
-            </button>
+            </Link>
           </div>
 
           {/* Condition Selection */}
