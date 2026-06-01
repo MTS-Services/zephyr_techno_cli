@@ -148,16 +148,47 @@ const SellWorth = () => {
               onClick={(e)=>{ e.stopPropagation(); setShowModels((s)=>!s); }}
               className="w-full text-left bg-white border border-[#BDC9CC] rounded-lg py-4 px-6 text-[#171C1E] text-base outline-none hover:border-custom transition-colors flex items-center justify-between"
             >
-              <span>{selectedModel?.name || 'Start typing or select from list...'}</span>
-              <ChevronDown className="w-6 h-6 text-gray-400" />
+              <span>{selectedModel?.name || 'Select a device'}</span>
+              <ChevronDown className={`w-6 h-6 text-gray-400 transition-transform ${showModels ? 'rotate-180' : ''}`} />
             </button>
 
             {showModels && (
-              <div className="absolute z-30 left-0 right-0 mt-2 bg-white border border-[#E6E6E6] rounded-lg p-3 shadow-lg">
-                <div className="grid grid-cols-2 gap-3 max-h-60 overflow-auto">
-                  {loadingModels && <div className="col-span-2">Loading models...</div>}
+              <div className="absolute z-30 left-0 right-0 mt-2 bg-[#2C3E50] border border-[#34495E] rounded-lg shadow-2xl overflow-hidden">
+                <div className="max-h-80 overflow-y-auto">
+                  {loadingModels && (
+                    <div className="px-4 py-6 text-center text-gray-300">Loading models...</div>
+                  )}
+                  {!loadingModels && models.length === 0 && (
+                    <div className="px-4 py-6 text-center text-gray-400">No models found</div>
+                  )}
                   {!loadingModels && models.map((m) => (
-                    <button key={m.id} onClick={()=>{ setSelectedModel(m); setShowModels(false); }} className={`px-3 py-2 rounded-lg border ${selectedModel?.id === m.id ? 'border-custom bg-[#F0F4F6]' : 'border-[#E6E6E6]'}`}>{m.name}</button>
+                    <button
+                      key={m.id}
+                      onClick={() => {
+                        setSelectedModel(m);
+                        setShowModels(false);
+                      }}
+                      className={`w-full text-left px-4 py-3 flex items-center justify-between transition-colors duration-200 ${
+                        selectedModel?.id === m.id
+                          ? 'bg-custom text-white'
+                          : 'text-gray-200 hover:bg-[#34495E]'
+                      }`}
+                    >
+                      <span className="font-medium">{m.name}</span>
+                      {selectedModel?.id === m.id && (
+                        <svg
+                          className="w-5 h-5"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      )}
+                    </button>
                   ))}
                 </div>
               </div>
