@@ -266,7 +266,7 @@ const Settings = () => {
         }
     };
 
-    const handleModalSubmit = () => {
+    const handleModalSubmit = async () => {
         if (!activeSection) return;
 
         const valueKey = activeSection.valueKey || 'value';
@@ -280,6 +280,28 @@ const Settings = () => {
             activeSection.key === 'models' ||
             activeSection.key === 'conditions'
         ) {
+            // Validate models require seriesId
+            if (activeSection.key === 'models') {
+                if (!modalValues.modelName || !modalValues.modelName.trim()) {
+                    await Swal.fire({
+                        icon: 'warning',
+                        title: 'Missing Information',
+                        text: 'Please enter a model name.',
+                        confirmButtonColor: '#0891b2',
+                    });
+                    return;
+                }
+                if (!modalValues.seriesId) {
+                    await Swal.fire({
+                        icon: 'warning',
+                        title: 'Missing Information',
+                        text: 'You need to select a series also.',
+                        confirmButtonColor: '#0891b2',
+                    });
+                    return;
+                }
+            }
+
             (async () => {
                 try {
                     const token = localStorage.getItem('token');
@@ -362,9 +384,22 @@ const Settings = () => {
                         };
                         setSettings((prev) => ({ ...prev, models: [...prev.models, item] }));
                     }
+
+                    await Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: 'Item added successfully.',
+                        confirmButtonColor: '#0891b2',
+                        timer: 2000,
+                        showConfirmButton: false,
+                    });
                 } catch (err) {
-                    // optionally show error
-                    // console.error(err);
+                    await Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: err.message || 'Failed to add item.',
+                        confirmButtonColor: '#0891b2',
+                    });
                 } finally {
                     handleCloseModal();
                 }
@@ -401,9 +436,22 @@ const Settings = () => {
                         ...prev,
                         storage: [...prev.storage, item],
                     }));
+
+                    await Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: 'Storage option added successfully.',
+                        confirmButtonColor: '#0891b2',
+                        timer: 2000,
+                        showConfirmButton: false,
+                    });
                 } catch (err) {
-                    // optionally show error
-                    // console.error(err);
+                    await Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: err.message || 'Failed to add storage option.',
+                        confirmButtonColor: '#0891b2',
+                    });
                 } finally {
                     handleCloseModal();
                 }
@@ -440,9 +488,22 @@ const Settings = () => {
                         ...prev,
                         ram: [...prev.ram, item],
                     }));
+
+                    await Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: 'RAM option added successfully.',
+                        confirmButtonColor: '#0891b2',
+                        timer: 2000,
+                        showConfirmButton: false,
+                    });
                 } catch (err) {
-                    // optionally show error
-                    // console.error(err);
+                    await Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: err.message || 'Failed to add RAM option.',
+                        confirmButtonColor: '#0891b2',
+                    });
                 } finally {
                     handleCloseModal();
                 }
@@ -479,9 +540,22 @@ const Settings = () => {
                         ...prev,
                         colors: [...prev.colors, item],
                     }));
+
+                    await Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: 'Color added successfully.',
+                        confirmButtonColor: '#0891b2',
+                        timer: 2000,
+                        showConfirmButton: false,
+                    });
                 } catch (err) {
-                    // optionally show error
-                    // console.error(err);
+                    await Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: err.message || 'Failed to add color.',
+                        confirmButtonColor: '#0891b2',
+                    });
                 } finally {
                     handleCloseModal();
                 }
@@ -554,8 +628,22 @@ const Settings = () => {
                             conditionPrices: { ...prev.conditionPrices, ...defaultPrices },
                         };
                     });
+
+                    await Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: isEdit ? 'Price updated successfully.' : 'Price added successfully.',
+                        confirmButtonColor: '#0891b2',
+                        timer: 2000,
+                        showConfirmButton: false,
+                    });
                 } catch (err) {
-                    // optionally show error
+                    await Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: err.message || `Failed to ${isEdit ? 'update' : 'add'} price.`,
+                        confirmButtonColor: '#0891b2',
+                    });
                 } finally {
                     handleCloseModal();
                 }
