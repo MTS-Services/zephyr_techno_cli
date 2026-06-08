@@ -104,6 +104,13 @@ const ViewModal = ({
                     </div>
                 </div>
 
+                {selectedOrder.cancellationReason && (
+                    <div className="mt-4 rounded-lg bg-red-50 p-4 border border-red-100">
+                        <h3 className="text-sm font-bold text-red-800">Cancellation Reason</h3>
+                        <p className="mt-1 text-sm text-red-700">{selectedOrder.cancellationReason}</p>
+                    </div>
+                )}
+
                 {/* Update Status */}
                 <div className="mt-6">
                     <h3 className="text-base font-bold text-gray-900">Update Order Status</h3>
