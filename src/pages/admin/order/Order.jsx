@@ -110,7 +110,7 @@ const Order = () => {
         setCurrentPage(1);
     };
 
-    const statusOptions = ['Processing', 'Delivered', 'Shipped', 'Cancelled'];
+    const statusOptions = ['Processing', 'Shipped', 'Delivered',  'Cancelled'];
 
     const getStatusColor = (status) => {
         const colors = {
