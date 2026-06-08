@@ -97,23 +97,32 @@ const Addlisting = ({ isEdit = false, listingId = null }) => {
         }
     }, [formData.seriesId, allModels]);
 
-    // Apply category-condition rules when editing an existing listing
-    // (runs after both conditions and formData.categoryId are available)
+    // Apply category-condition rules when formData.categoryId is available
+    // Ensure same behavior for add and edit: when category is 'New' condition is disabled
     useEffect(() => {
-        if (!isEdit || !conditions.length || !formData.categoryId) return;
+        if (!conditions.length || !formData.categoryId) return;
         const category = categories.find(cat => cat.id === formData.categoryId);
         const categoryName = category?.name?.toLowerCase();
+
         if (categoryName === 'new') {
-            setConditionDisabled(false);
-            setAvailableConditions(conditions);
+            // For 'New' category, no condition should be required
+            setAvailableConditions([]);
+            setConditionDisabled(true);
+            updateField('conditionId', '');
         } else if (categoryName === 'used') {
+            // For used, exclude 'New' condition option
+            const usedConditions = conditions.filter(c => c.name?.toLowerCase() !== 'new');
+            setAvailableConditions(usedConditions);
             setConditionDisabled(false);
-            setAvailableConditions(conditions.filter(c => c.name?.toLowerCase() !== 'new'));
+            // If currently empty, pick the first available used condition
+            if (!formData.conditionId) updateField('conditionId', usedConditions[0]?.id || '');
         } else {
-            setConditionDisabled(false);
+            // Default: show all conditions and enable selection
             setAvailableConditions(conditions);
+            setConditionDisabled(false);
+            if (!formData.conditionId) updateField('conditionId', conditions[0]?.id || '');
         }
-    }, [isEdit, conditions, categories, formData.categoryId]);
+    }, [conditions, categories, formData.categoryId]);
 
     // Fetch listing data when in edit mode
     useEffect(() => {
