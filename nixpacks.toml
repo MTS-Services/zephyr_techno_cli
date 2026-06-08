@@ -1,14 +1,5 @@
 [phases.setup]
-nixPkgs = []
-nixOverlays = []
-aptPkgs = ["curl", "ca-certificates", "gnupg", "wget"]
-
-[phases.caddy]
-dependsOn = ["setup"]
-nixPkgs = ["caddy"]
-nixpkgsArchive = "ba913eda2df8eb72147259189d55932012df6301"
-nixOverlays = []
-cmds = ["caddy fmt --overwrite /assets/Caddyfile"]
+aptPkgs = ["curl", "ca-certificates"]
 
 [phases.install]
 dependsOn = ["setup"]
@@ -18,7 +9,6 @@ cmds = [
   "npm ci"
 ]
 cacheDirectories = ["/root/.npm"]
-paths = ["/app/node_modules/.bin"]
 
 [phases.build]
 dependsOn = ["install"]
@@ -26,4 +16,4 @@ cmds = ["npm run build"]
 cacheDirectories = ["node_modules/.cache"]
 
 [start]
-cmd = "exec caddy run --config /assets/Caddyfile --adapter caddyfile 2>&1"
+cmd = "npx serve dist -s -l 3000"
