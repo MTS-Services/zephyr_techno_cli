@@ -170,7 +170,7 @@ const ProductDetails = () => {
                 Condition
               </p>
               <span className="px-4 py-2 rounded-sm text-[13px] border border-[#151A2A] text-[#151A2A] inline-block">
-                {product.condition?.name}
+                {product.condition?.name || product.category?.name || 'New'}
               </span>
             </div>
 

@@ -76,9 +76,9 @@ const Card = ({
                 {/* Price + Stock row */}
                 <div className="flex items-end justify-between mb-3">
                     <div>
-                        <p className="text-sm text-gray-400 line-through">
+                        {/* <p className="text-sm text-gray-400 line-through">
                             ${originalPrice.toLocaleString()}
-                        </p>
+                        </p> */}
                         <p className="text-lg font-semibold text-gray-900">
                             ${discountedPrice.toLocaleString()}
                         </p>

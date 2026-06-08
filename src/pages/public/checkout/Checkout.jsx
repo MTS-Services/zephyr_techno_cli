@@ -35,7 +35,14 @@ const Checkout = () => {
     const total = promoResult ? promoResult.finalTotal + shippingCost : baseTotal;
 
     const handleChange = (e) => {
-        setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+      const { name, value } = e.target;
+      // Sanitize phone input to allow only digits and common phone characters
+      if (name === 'phone') {
+        const sanitized = value.replace(/[^\d+()\-\s]/g, '');
+        setForm((prev) => ({ ...prev, [name]: sanitized }));
+      } else {
+        setForm((prev) => ({ ...prev, [name]: value }));
+      }
     };
 
     const handleApplyPromo = async () => {
@@ -240,6 +247,9 @@ const Checkout = () => {
                     placeholder="+1 (555) 000-0000"
                     value={form.phone}
                     onChange={handleChange}
+                    inputMode="tel"
+                    autoComplete="tel"
+                    pattern="[0-9()+\-\s]*"
                     className="h-12 px-4 border border-[#E5E7EB] rounded-sm text-base text-[#151A2A] placeholder-[#6B7280] focus:outline-none focus:border-custom focus:ring-1 focus:ring-custom bg-white"
                   />
                 </div>
