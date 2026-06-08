@@ -19,6 +19,11 @@ const FinalizeSale = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    if (name === 'phone') {
+      const sanitized = value.replace(/[^\d+()\-\s]/g, '');
+      setFormData((prev) => ({ ...prev, [name]: sanitized }));
+      return;
+    }
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -151,6 +156,9 @@ const FinalizeSale = () => {
                       name="phone"
                       value={formData.phone}
                       onChange={handleInputChange}
+                      inputMode="tel"
+                      autoComplete="tel"
+                      pattern="[0-9()+\-\s]*"
                       placeholder="07123 456789"
                       className="w-full bg-white border border-[#BDC9CC] rounded-lg py-4 px-5 text-[#171C1E] outline-none focus:border-custom focus:ring-1 focus:ring-custom transition-all"
                     />
