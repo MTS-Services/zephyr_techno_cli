@@ -14,7 +14,14 @@ const ContactFormSection = () => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setForm((s) => ({ ...s, [name]: value }));
+        
+        // Sanitize phone number to only allow digits and tel characters
+        if (name === 'phone') {
+            const sanitized = value.replace(/[^\d+()\-\s]/g, '');
+            setForm((s) => ({ ...s, [name]: sanitized }));
+        } else {
+            setForm((s) => ({ ...s, [name]: value }));
+        }
     };
 
     const handleSubmit = async () => {
@@ -110,12 +117,15 @@ const ContactFormSection = () => {
                             Phone Number
                         </label>
                         <input
-                            type='text'
+                            type='tel'
                             name='phone'
                             value={form.phone}
                             onChange={handleChange}
                             placeholder='Enter your phone number'
                             className='h-12.5 w-full rounded-[14px] border border-gray-200 bg-white px-4 text-sm text-[#0A0A0A] outline-none focus:border-[#00B8DB]'
+                            inputMode='tel'
+                            autoComplete='tel'
+                            pattern='[0-9()+\-\s]*'
                         />
                     </div>
 

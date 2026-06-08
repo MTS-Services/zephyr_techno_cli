@@ -16,6 +16,12 @@ const Contact = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    if (name === "phone") {
+      const sanitizedPhone = value.replace(/[^\d+()\-\s]/g, "");
+      setForm((s) => ({ ...s, [name]: sanitizedPhone }));
+      return;
+    }
+
     setForm((s) => ({ ...s, [name]: value }));
   };
 
@@ -116,9 +122,12 @@ const Contact = () => {
                       </label>
                       <input
                         name="phone"
+                        type="tel"
+                        inputMode="tel"
+                        autoComplete="tel"
+                        pattern="[0-9()+\\-\\s]*"
                         value={form.phone}
                         onChange={handleChange}
-                        type="tel"
                         placeholder="+1 (555) 000-0000"
                         className="w-full border border-[#BDC9CC] rounded px-4 py-2.5 text-sm text-[#151A2A] bg-white focus:outline-none focus:ring-2 focus:ring-cyan-300 transition-shadow"
                       />

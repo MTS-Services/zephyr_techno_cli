@@ -5,15 +5,13 @@ import AdminDashboardTitle from '../../../components/dashboards/AdminDashboardTi
 const API_BASE_URL = import.meta.env.VITE_BASE_URL || 'https://api-zephyr-techno.maktechgroup.tech';
 
 const STATUS_STYLES = {
-    NEW: 'bg-amber-100 text-amber-700',
     PENDING: 'bg-blue-100 text-blue-700',
-    RESOLVED: 'bg-green-100 text-green-700',
+    CONTRACTED: 'bg-green-100 text-green-700',
 };
 
 const STATUS_LABEL = {
-    NEW: 'New',
     PENDING: 'Pending',
-    RESOLVED: 'Resolved',
+    CONTRACTED: 'Contracted',
 };
 
 const ContactManagement = () => {
@@ -234,7 +232,7 @@ const ContactManagement = () => {
                                                 {STATUS_LABEL[contact.status] || contact.status}
                                             </span>
                                         </td>
-                                                        <td className="px-6 py-4">
+                                        <td className="px-6 py-4">
                                             <button
                                                 type="button"
                                                 onClick={(e) => handleToggleMenu(e, contact.id)}
@@ -261,21 +259,18 @@ const ContactManagement = () => {
                                                     >
                                                         View Details
                                                     </button>
-                                                    <div className="my-1 border-t border-gray-200" />
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handleStatusChange(contact, 'PENDING')}
-                                                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer"
-                                                    >
-                                                        Mark Pending
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handleStatusChange(contact, 'RESOLVED')}
-                                                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer"
-                                                    >
-                                                        Mark Resolved
-                                                    </button>
+                                                    {contact.status === 'PENDING' && (
+                                                        <>
+                                                            <div className="my-1 border-t border-gray-200" />
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleStatusChange(contact, 'CONTRACTED')}
+                                                                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer"
+                                                            >
+                                                                Mark Contracted
+                                                            </button>
+                                                        </>
+                                                    )}
                                                     <div className="my-1 border-t border-gray-200" />
                                                     <button
                                                         type="button"
