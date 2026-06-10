@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 
 const NOTIFICATIONS = [
+  
   { name: "James K.", action: "bought", phone: "iPhone 15 Pro Max" },
   { name: "Sarah M.", action: "sold", phone: "Samsung Galaxy S24 Ultra" },
   { name: "Daniel O.", action: "bought", phone: "iPhone 14 Pro" },
