@@ -6,7 +6,7 @@ import Container from "../../../layout/Container";
 
 const Promotion = () => {
   return (
-    <div className="py-10 md:pb-16">
+    <div className="py-6 md:pb-16">
       <Container>
         {/* Mobile -> up to lg (0 - 1024px): show only the image (no text/buttons) */}
         <div className="lg:hidden">
@@ -16,7 +16,7 @@ const Promotion = () => {
               alt="Promotion"
               className="w-full h-auto object-fit rounded-xl"
             />
-            <div className="absolute bottom-[15%] left-8">
+            <div className="absolute bottom-[12%] left-8">
               <Link
                 to="/sell"
                 className="inline-flex items-center rounded-lg bg-[#4bb9cf] px-5 py-2.5 text-sm font-semibold text-white hover:brightness-110 cursor-pointer hover:scale-105 transform transition-all duration-300"
