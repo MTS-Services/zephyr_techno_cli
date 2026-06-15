@@ -11,6 +11,7 @@ import {
 } from "react-icons/fi";
 import RelatedProducts from "./sections/relatedProduct/RelatedProducts";
 import { useCart } from "../../../context/CartContext";
+import Swal from 'sweetalert2';
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
@@ -87,12 +88,20 @@ const ProductDetails = () => {
           setTimeout(() => setCartMessage(''), 2500);
         }
       } else {
-        setCartMessage(result.message || 'Failed to add to cart.');
-        setTimeout(() => setCartMessage(''), 3000);
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: result.message || 'Failed to add to cart.',
+          confirmButtonColor: '#47B5C9'
+        });
       }
     } catch {
-      setCartMessage('Something went wrong.');
-      setTimeout(() => setCartMessage(''), 3000);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Something went wrong.',
+        confirmButtonColor: '#47B5C9'
+      });
     } finally {
       setAddingToCart(false);
     }

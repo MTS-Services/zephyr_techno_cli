@@ -12,6 +12,7 @@ import {
 } from "react-icons/fi";
 import { Link } from "react-router";
 import { useCart } from "../../../context/CartContext";
+import Swal from 'sweetalert2';
 
 const Cart = () => {
   const { cartItems, subtotal, loading, updateCartItem, removeCartItem } =
@@ -26,8 +27,17 @@ const Cart = () => {
     const newQty = Math.max(1, item.quantity + change);
     if (newQty === item.quantity) return;
     setUpdatingId(id);
-    await updateCartItem(id, newQty);
+    const result = await updateCartItem(id, newQty);
     setUpdatingId(null);
+    
+    if (result && !result.success) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: result.message || 'Failed to update quantity.',
+        confirmButtonColor: '#47B5C9'
+      });
+    }
   };
 
   const removeItem = async (id) => {

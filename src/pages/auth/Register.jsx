@@ -133,7 +133,7 @@ const Register = () => {
                         <input
                             type="tel"
                             value={phone}
-                            onChange={(e) => setPhone(e.target.value)}
+                            onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
                             placeholder="Enter your Phone number.."
                             className="input w-full bg-[#ebecf0] border-none focus:outline-none"
                         />
