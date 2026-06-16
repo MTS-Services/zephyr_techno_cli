@@ -52,14 +52,14 @@ const Navbar = () => {
       <Container>
         <div className="navbar px-0!">
           {/* LEFT — hamburger + logo */}
-          <div className="navbar-start px-0! -ml-2 lg:-ml-0.5">
+          <div className="navbar-start">
             {/* Mobile hamburger */}
-            <button
+            {/* <button
               className="btn btn-ghost btn-circle lg:hidden"
               onClick={() => setSidebarOpen(true)}
             >
               <FiMenu size={22} />
-            </button>
+            </button> */}
 
             {/* Logo */}
             <Link to="/" className="cursor-pointer">
@@ -165,20 +165,20 @@ const Navbar = () => {
         </div>
 
         {/* Backdrop */}
-        <div
+        {/* <div
           className={`fixed inset-0 bg-black/50 z-40 lg:hidden transition-opacity duration-300
                     ${sidebarOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
           onClick={() => setSidebarOpen(false)}
-        />
+        /> */}
 
         {/* Sidebar */}
-        <div
+        {/* <div
           className={`fixed top-0 left-0 h-full w-72 bg-white z-50 lg:hidden
                     flex flex-col shadow-2xl
                     transition-transform duration-300 ease-in-out
                     ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
         >
-          {/* Sidebar header */}
+          // Sidebar header
           <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
             <Link to="/" onClick={() => setSidebarOpen(false)} className="p-0">
               <img
@@ -195,7 +195,7 @@ const Navbar = () => {
             </button>
           </div>
 
-          {/* Sidebar nav links */}
+          // Sidebar nav links
           <ul className="flex flex-col px-4 py-6 gap-1 flex-1">
             {navLinks.map(({ to, label }) => (
               <li key={to}>
@@ -212,7 +212,7 @@ const Navbar = () => {
             ))}
           </ul>
 
-          {/* Sidebar bottom buttons */}
+          // Sidebar bottom buttons
           <div className="flex flex-col gap-3 px-6 py-6 border-t border-gray-100">
             <Link
               to="/login"
@@ -229,7 +229,7 @@ const Navbar = () => {
               Sell Your Phone
             </Link>
           </div>
-        </div>
+        </div> */}
       </Container>
     </>
   );
