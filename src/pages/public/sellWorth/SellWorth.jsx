@@ -361,29 +361,37 @@ const SellWorth = () => {
   return (
     <div className="bg-[#FBFDFF] min-h-screen py-10 lg:py-16">
       <Container>
-        <div className="flex items-center justify-center mb-12 overflow-x-auto pb-4 sm:pb-0">
-          <div className="flex items-center gap-2 sm:gap-4 whitespace-nowrap">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-[#006878] text-white flex items-center justify-center text-sm font-bold">
+        <div className="mb-12 w-full max-w-xl sm:max-w-none mx-auto px-1 sm:px-0">
+          <div className="flex items-center justify-between sm:justify-center gap-1 sm:gap-4">
+            <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+              <div className="w-7 h-7 sm:w-8 sm:h-8 shrink-0 rounded-full bg-[#006878] text-white flex items-center justify-center text-xs sm:text-sm font-bold">
                 1
               </div>
-              <span className="text-[#171C1E] text-sm font-semibold">
+              <span className="text-[11px] sm:text-sm font-semibold text-[#171C1E] leading-tight">
                 Device Details
               </span>
             </div>
-            <div className="w-8 sm:w-12 h-px bg-[#BDC9CC] mx-1 sm:mx-2"></div>
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-[#DFE3E5] text-[#3D494C] flex items-center justify-center text-sm font-bold">
+
+            <div className="h-px flex-1 min-w-2 max-w-6 sm:flex-none sm:w-12 bg-[#BDC9CC] mx-0.5 sm:mx-2" />
+
+            <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+              <div className="w-7 h-7 sm:w-8 sm:h-8 shrink-0 rounded-full bg-[#DFE3E5] text-[#3D494C] flex items-center justify-center text-xs sm:text-sm font-bold">
                 2
               </div>
-              <span className="text-[#8D9A9D] text-sm">Condition</span>
+              <span className="text-[11px] sm:text-sm text-[#8D9A9D] leading-tight">
+                Condition
+              </span>
             </div>
-            <div className="w-8 sm:w-12 h-px bg-[#BDC9CC] mx-1 sm:mx-2"></div>
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-[#DFE3E5] text-[#3D494C] flex items-center justify-center text-sm font-bold">
+
+            <div className="h-px flex-1 min-w-2 max-w-6 sm:flex-none sm:w-12 bg-[#BDC9CC] mx-0.5 sm:mx-2" />
+
+            <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+              <div className="w-7 h-7 sm:w-8 sm:h-8 shrink-0 rounded-full bg-[#DFE3E5] text-[#3D494C] flex items-center justify-center text-xs sm:text-sm font-bold">
                 3
               </div>
-              <span className="text-[#8D9A9D] text-sm">Summary</span>
+              <span className="text-[11px] sm:text-sm text-[#8D9A9D] leading-tight">
+                Summary
+              </span>
             </div>
           </div>
         </div>
