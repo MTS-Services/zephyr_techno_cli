@@ -285,7 +285,7 @@
 // export default SellWorth;
 
 import React, { useEffect, useRef, useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, ShieldCheck } from "lucide-react";
 import Container from "../../../layout/Container";
 import { Link } from "react-router";
 
@@ -538,11 +538,7 @@ const SellWorth = () => {
             Reveal Price
           </Link>
           <div className="flex items-center gap-2">
-            <img
-              src="https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/b29d6407-9548-4b2b-9525-128bce1da365"
-              alt="Guarantee"
-              className="w-3 object-contain"
-            />
+            <ShieldCheck className="w-4 h-4 text-[#3D494C] shrink-0" aria-hidden="true" />
             <span className="text-[#3D494C] text-sm">
               Highest price guarantee within the UK
             </span>
@@ -551,7 +547,7 @@ const SellWorth = () => {
 
         <div className="relative w-full rounded-2xl overflow-hidden min-h-75 md:min-h-100 flex items-center shadow-lg">
           <img
-            src="https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/ceb5a280-2880-4976-b709-8da7578e1a6f"
+            src="/src/assets/Premium-electronics-close-up.webp"
             alt="Sustainable Tech"
             className="absolute inset-0 w-full h-full object-cover"
           />
