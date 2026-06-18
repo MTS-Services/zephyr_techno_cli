@@ -27,7 +27,7 @@ const CellPhoneMange = () => {
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`${API_BASE_URL}/api/admin/sell-requests?page=${currentPage}&limit=20`, {
+            const res = await fetch(`${API_BASE_URL}/api/admin/sell-requests?page=${currentPage}&limit=8`, {
                 headers: token ? { Authorization: `Bearer ${token}` } : {},
             });
 
