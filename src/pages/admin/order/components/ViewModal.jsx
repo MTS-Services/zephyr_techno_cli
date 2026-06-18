@@ -1,5 +1,15 @@
 import React from 'react';
 
+const getSelectedOptionLines = (options) => {
+    if (!options) return [];
+
+    return [
+        { label: 'color', value: options.color?.name ?? options.color },
+        { label: 'storage', value: options.storage?.name ?? options.storage },
+        { label: 'ram', value: options.ram?.name ?? options.ram },
+    ].filter((entry) => entry.value);
+};
+
 const ViewModal = ({
     isOpen,
     selectedOrder,
@@ -64,22 +74,33 @@ const ViewModal = ({
                         </div>
 
                         <div className="space-y-2">
-                            {selectedOrder.items.map((item, i) => (
+                            {selectedOrder.items.map((item, i) => {
+                                const optionLines = getSelectedOptionLines(item.selectedOptions);
+
+                                return (
                                 <div key={i} className="flex items-center gap-3 rounded-xl bg-gray-100 px-3 py-2">
                                     <img
                                         src={item.product.thumbnail}
                                         alt={item.product.title}
-                                        className="h-10 w-10 rounded-lg bg-white object-contain p-0.5"
+                                        className="h-14 w-14 rounded-lg bg-white object-contain p-0.5"
                                     />
                                     <div className="min-w-0 flex-1">
                                         <p className="truncate text-sm font-medium text-gray-800">{item.product.title}</p>
-                                        <p className="text-xs text-gray-500">Quantity: {item.quantity}</p>
+                                        {optionLines.length > 0 ? (
+                                            <div className="mt-0.5 space-y-0.5">
+                                                {optionLines.map(({ label, value }) => (
+                                                    <p key={label} className="text-sm text-gray-800">
+                                                        {label} : {value}
+                                                    </p>
+                                                ))}
+                                            </div>
+                                        ) : null}
+                                        <p className="text-sm text-gray-800">Quantity: {item.quantity}</p>
                                     </div>
-                                    <p className="text-sm font-semibold text-gray-800">{formatOrderPrice(item.subtotal)}</p>
                                 </div>
-                            ))}
+                                );
+                            })}
                         </div>
-
                         <div className="mt-3 space-y-1.5 text-sm">
                             <div className="flex justify-between text-gray-600">
                                 <span>Subtotal</span>
