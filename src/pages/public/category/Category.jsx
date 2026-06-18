@@ -43,7 +43,7 @@ const Category = () => {
                                 to='/products?filter=USED'
                                 className="inline-flex items-center rounded-lg bg-custom px-4 py-2 text-xs md:text-sm font-semibold text-white cursor-pointer hover:scale-105 transform transition-all duration-300"
                             >
-                                Browse Used Phones
+                                Browse Used
                             </Link>
                         </div>
                     </div>
