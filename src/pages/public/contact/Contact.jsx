@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Swal from "sweetalert2";
 import Container from "../../../layout/Container";
 
 const Contact = () => {
@@ -13,8 +14,6 @@ const Contact = () => {
     import.meta.env.VITE_BASE_URL ||
     "https://api-zephyr-techno.maktechgroup.tech";
   const [submitting, setSubmitting] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -29,7 +28,6 @@ const Contact = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
     setSubmitting(true);
     try {
       const payload = {
@@ -46,12 +44,24 @@ const Contact = () => {
         body: JSON.stringify(payload),
       });
 
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text || "Failed to send message");
+      let data = {};
+      try {
+        data = await res.json();
+      } catch {
+        data = {};
       }
 
-      setSuccess(true);
+      if (!res.ok) {
+        throw new Error(data.message || data.error || "Failed to send message");
+      }
+
+      await Swal.fire({
+        icon: "success",
+        title: "Message sent!",
+        text: data.message || "Thank you for contacting us. We will get back to you soon.",
+        showConfirmButton: true,
+      });
+
       setForm({
         firstName: "",
         email: "",
@@ -59,9 +69,12 @@ const Contact = () => {
         phone: "",
         message: "",
       });
-      setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
-      setError(err.message || "An error occurred");
+      Swal.fire({
+        icon: "error",
+        title: "Submission failed",
+        text: err.message || "An error occurred. Please try again.",
+      });
     } finally {
       setSubmitting(false);
     }
@@ -185,26 +198,13 @@ const Contact = () => {
                   </div>
 
                   <div className="pt-2">
-                    <div>
-                      {error && (
-                        <p className="text-sm text-red-600 mb-2">{error}</p>
-                      )}
-                      <button
-                        type="submit"
-                        disabled={submitting}
-                        className={`w-full sm:w-auto px-8 py-3 rounded-lg text-sm font-medium transition-colors ${
-                          success
-                            ? "bg-green-600 hover:bg-green-700 text-white"
-                            : "btn-custom"
-                        }`}
-                      >
-                        {success
-                          ? "Message Sent Successfully"
-                          : submitting
-                            ? "Sending..."
-                            : "Submit Message"}
-                      </button>
-                    </div>
+                    <button
+                      type="submit"
+                      disabled={submitting}
+                      className="btn-custom w-full sm:w-auto px-8 py-3 rounded-lg text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-70"
+                    >
+                      {submitting ? "Sending..." : "Submit Message"}
+                    </button>
                   </div>
                 </form>
               </div>
