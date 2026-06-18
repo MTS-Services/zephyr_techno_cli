@@ -116,9 +116,9 @@ const Checkout = () => {
             {/* Contact Information — only shown for guests */}
             {!isAuthenticated && (
             <section className="flex flex-col gap-6">
-              <div className="flex justify-between items-baseline">
-                <h1 className="text-3xl font-bold text-[#151A2A]">Contact Information</h1>
-                <a href="/login" className="text-sm font-semibold text-custom hover:underline whitespace-nowrap ml-4">
+              <div className="flex flex-col gap-2 md:flex-row md:justify-between md:items-baseline">
+                <h1 className="text-2xl md:text-3xl font-bold text-[#151A2A]">Contact Information</h1>
+                <a href="/login" className="text-sm font-semibold text-custom hover:underline md:whitespace-nowrap md:ml-4">
                   Already have an account? Log in
                 </a>
               </div>
