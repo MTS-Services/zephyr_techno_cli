@@ -776,7 +776,11 @@ const Settings = () => {
                         <Tag
                             key={`${label}-${index}`}
                             label={label}
-                            onDelete={() => handleDeleteItem(section.key, id, index)}
+                            onDelete={
+                                section.key === 'categories'
+                                    ? undefined
+                                    : () => handleDeleteItem(section.key, id, index)
+                            }
                         />
                     );
                 })}
