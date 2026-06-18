@@ -64,7 +64,7 @@ const MobileBottomNav = () => {
   };
 
   return (
-    <nav ref={navRef} className="sm:hidden fixed w-full bottom-0 z-30">
+    <nav ref={navRef} className="lg:hidden fixed w-full bottom-0 z-30">
       <div className="rounded-lg bg-white border border-slate-200 border-t-custom shadow-xl shadow-custom/5">
         <ul className="flex items-center justify-between px-2 py-2">
           {items.map((it) => {
