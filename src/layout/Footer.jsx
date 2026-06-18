@@ -2,7 +2,7 @@ import React from "react";
 import logo from "../assets/logo.webp";
 import Container from "./Container";
 import { Link } from "react-router";
-import { FaFacebookF, FaInstagram, FaYoutube } from "react-icons/fa";
+import { FaFacebookF, FaInstagram, FaWhatsapp, FaYoutube } from "react-icons/fa";
 import { MdOutlineEmail, MdOutlinePhone } from "react-icons/md";
 
 const Footer = () => {
@@ -24,22 +24,22 @@ const Footer = () => {
             </p>
             <div className="flex gap-3 mt-4">
               <a
-                href="#"
-                className="w-8 h-8 rounded-full border border-black/20 flex items-center justify-center hover:bg-black/10 transition-colors"
+                href="https://www.instagram.com/zephyrtechnology"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+                className="w-10 h-10 rounded-full border border-black/20 flex items-center justify-center hover:bg-black/10 transition-colors"
               >
-                <FaFacebookF size={13} />
+                <FaInstagram size={18} />
               </a>
               <a
-                href="#"
-                className="w-8 h-8 rounded-full border border-black/20 flex items-center justify-center hover:bg-black/10 transition-colors"
+                href="https://wa.me/447500990009"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="WhatsApp"
+                className="w-10 h-10 rounded-full border border-black/20 flex items-center justify-center hover:bg-black/10 transition-colors"
               >
-                <FaInstagram size={13} />
-              </a>
-              <a
-                href="#"
-                className="w-8 h-8 rounded-full border border-black/20 flex items-center justify-center hover:bg-black/10 transition-colors"
-              >
-                <FaYoutube size={13} />
+                <FaWhatsapp size={18} />
               </a>
             </div>
           </div>
@@ -150,6 +150,15 @@ const Footer = () => {
               >
                 <MdOutlinePhone size={20} />
                 44 1753 316031
+              </a>
+              <a
+                href="https://wa.me/447500990009"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-base text-[#6A6A6A] flex items-center gap-2 hover:underline"
+              >
+                <FaWhatsapp size={20} />
+                +44 7500 990009
               </a>
             </div>
           </div>

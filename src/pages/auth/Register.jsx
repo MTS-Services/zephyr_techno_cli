@@ -14,6 +14,7 @@ const Register = () => {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [error, setError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const navigate = useNavigate();
@@ -169,7 +170,7 @@ const Register = () => {
                         </label>
                         <div className="relative">
                             <input
-                                type={showPassword ? 'text' : 'password'}
+                                type={showConfirmPassword ? 'text' : 'password'}
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
                                 placeholder="confirm password"
@@ -178,9 +179,9 @@ const Register = () => {
                             <button
                                 type="button"
                                 className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500"
-                                onClick={() => setShowPassword(!showPassword)}
+                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                             >
-                                {showPassword ? <VscEyeClosed /> : <VscEye />}
+                                {showConfirmPassword ? <VscEyeClosed /> : <VscEye />}
                             </button>
                         </div>
                     </div>
