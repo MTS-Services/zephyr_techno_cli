@@ -158,7 +158,7 @@ const AboutDevice = () => {
             <div className="flex items-center gap-6">
               <div className="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center p-2">
                 <img
-                  src="https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/0f3789cd-e206-44ac-9094-96491b1244bf"
+                  src="/src/assets/Device_Preview.png"
                   alt={device?.deviceName || 'Device'}
                   className="object-contain h-full w-full"
                 />
