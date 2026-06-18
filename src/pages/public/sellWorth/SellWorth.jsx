@@ -548,7 +548,7 @@ const SellWorth = () => {
         <div className="relative w-full rounded-2xl overflow-hidden min-h-75 md:min-h-100 flex items-center shadow-lg">
           <img
             src="/src/assets/Premium-electronics-close-up.webp"
-            alt="Sustainable Tech"
+            alt="Sustainable Tech" 
             className="absolute inset-0 w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-linear-to-b from-[#171C1E]/60 to-transparent"></div>
