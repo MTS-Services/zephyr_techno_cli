@@ -1,6 +1,6 @@
 import React from "react";
 import banner from "../../../../../../src/assets/banner/hero.webp";
-import mobileBanner from "../../../../../../src/assets/banner/mobilebanner2.jpg";
+import mobileBanner from "../../../../../../src/assets/banner/mobilebanner3.jpg";
 import { Link } from "react-router";
 import Container from "../../../../../layout/Container";
 
@@ -16,7 +16,7 @@ const Hero = () => {
                 className="w-full h-64 object-fit"
                 alt="Mobile hero banner"
               />
-              <div className="absolute bottom-10 left-8">
+              <div className="absolute bottom-10 left-[5%]">
                 <Link
                   to="/products"
                   className="inline-flex items-center rounded-lg bg-custom px-5 py-2.5 text-sm font-semibold text-white hover:brightness-110 cursor-pointer hover:scale-105 transform transition-all duration-300"
