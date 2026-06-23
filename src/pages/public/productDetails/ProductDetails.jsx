@@ -235,7 +235,7 @@ const ProductDetails = () => {
             )}
 
             {/* RAM */}
-            {product.availableRamOptions?.length > 0 && (
+            {/* {product.availableRamOptions?.length > 0 && (
               <div className="mb-8">
                 <p className="text-[11px] font-bold tracking-widest text-[#151A2A] uppercase mb-2">
                   RAM
@@ -256,7 +256,7 @@ const ProductDetails = () => {
                   ))}
                 </div>
               </div>
-            )}
+            )} */}
 
             {/* Actions */}
             <div className="flex flex-col sm:flex-row gap-3 mb-3 mt-auto">
