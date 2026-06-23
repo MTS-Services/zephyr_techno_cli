@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router';
-import newPhone from '../../../assets/category/newPhone.webp';
-import usedPhone from '../../../assets/category/usedPhone.webp'
+import newPhone from '../../../assets/banner/newphone1.png';
+import usedPhone from '../../../assets/banner/usedPhone1.jpg'
 import Container from '../../../layout/Container';
 
 const Category = () => {
