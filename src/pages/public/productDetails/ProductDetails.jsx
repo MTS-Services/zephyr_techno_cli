@@ -55,19 +55,23 @@ const ProductDetails = () => {
   }, [id]);
 
   useEffect(() => {
-    setSelectedImage(0);
-  }, [selectedColor]);
-
-  const images = useMemo(() => {
-    if (!product?.images) return [];
+    if (!product?.images?.length || !selectedColor) return;
     const sorted = [...product.images].sort(
       (a, b) => a.displayOrder - b.displayOrder,
     );
-    if (!selectedColor) return sorted;
-    const colorSpecific = sorted.filter((img) => img.colorId === selectedColor);
-    if (colorSpecific.length > 0) return colorSpecific;
-    return sorted.filter((img) => !img.colorId);
-  }, [product, selectedColor]);
+    const colorIdx = sorted.findIndex((img) => img.colorId === selectedColor);
+    if (colorIdx >= 0) {
+      setSelectedImage(colorIdx);
+      return;
+    }
+    const sharedIdx = sorted.findIndex((img) => !img.colorId);
+    setSelectedImage(sharedIdx >= 0 ? sharedIdx : 0);
+  }, [selectedColor, product?.id]);
+
+  const allImages = useMemo(() => {
+    if (!product?.images) return [];
+    return [...product.images].sort((a, b) => a.displayOrder - b.displayOrder);
+  }, [product]);
 
   if (loading) {
     return (
@@ -137,9 +141,9 @@ const ProductDetails = () => {
           {/* Left: Image Gallery */}
           <div className="w-full lg:w-1/2 shrink-0">
             <div className="rounded-xl overflow-hidden mb-3 aspect-4/3 flex items-center justify-center bg-gray-50">
-              {images.length > 0 ? (
+              {allImages.length > 0 ? (
                 <img
-                  src={images[selectedImage]?.imageUrl}
+                  src={allImages[selectedImage]?.imageUrl}
                   alt={product.title}
                   className="w-full h-full object-contain"
                 />
@@ -147,12 +151,15 @@ const ProductDetails = () => {
                 <span className="text-gray-400 text-sm">No image</span>
               )}
             </div>
-            {images.length > 1 && (
+            {allImages.length > 1 && (
               <div className="grid grid-cols-4 gap-2 md:gap-3">
-                {images.map((img, idx) => (
+                {allImages.map((img, idx) => (
                   <button
                     key={img.id}
-                    onClick={() => setSelectedImage(idx)}
+                    onClick={() => {
+                      setSelectedImage(idx);
+                      if (img.colorId) setSelectedColor(img.colorId);
+                    }}
                     className={`aspect-4/3 rounded-lg border-2 overflow-hidden transition-all p-0.5 ${
                       selectedImage === idx
                         ? "border-custom"
@@ -219,10 +226,9 @@ const ProductDetails = () => {
                         title={c.name}
                         aria-label={c.name}
                         aria-pressed={isSelected}
-                        onClick={() => {
-                          setSelectedColor(c.id);
-                          setSelectedImage(0);
-                        }}
+                      onClick={() => {
+                        setSelectedColor(c.id);
+                      }}
                         className={`w-8 h-8 rounded-full transition-all shrink-0 ${
                           isSelected
                             ? 'ring-2 ring-[#151A2A] ring-offset-2 scale-105'
