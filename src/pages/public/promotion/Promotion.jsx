@@ -1,6 +1,6 @@
 import React from "react";
 import promotion from "../../../assets/banner/promotions.webp";
-import mobileBanner from "../../../assets/banner/sell_your_phone1.webp";
+import mobileBanner from "../../../assets/banner/sell_your_phone2.jpg";
 import { Link } from "react-router";
 import Container from "../../../layout/Container";
 
@@ -16,26 +16,10 @@ const Promotion = () => {
               alt="Promotion"
               className="w-full h-52 object-fit rounded-xl"
             />
-            {/* <div className="absolute bottom-[12%] left-8">
+            <div className="absolute bottom-4 left-[48%] sm:bottom-6 sm:left-6">
               <Link
                 to="/sell"
-                className="inline-flex items-center rounded-lg bg-[#4bb9cf] px-5 py-2.5 text-sm font-semibold text-white hover:brightness-110 cursor-pointer hover:scale-105 transform transition-all duration-300"
-              >
-                Sell Your Phone
-              </Link>
-            </div> */}
-            <div className="absolute -right-6  top-1/2 w-[60%] sm:w-[50%] -translate-y-1/2 text-white">
-              <h2 className="text-lg sm:text-xl uppercase font-extrabold tracking-wide drop-shadow">
-                Sell Your Phone
-                <span className="block mt-0.5">In Minutes</span>
-              </h2>
-              <p className="mt-2 sm:mt-4 text-[12px]  font-semibold text-white/90 leading-relaxed w-[85%]">
-                Tired of your old device? Trading it in has never been easier.
-                We offer the best market rates and a seamless process.
-              </p>
-              <Link
-                to="/sell"
-                className="mt-1 sm:mt-6 hover:scale-105 inline-flex items-center rounded-lg bg-[#4bb9cf] px-4 py-2 sm:px-5 sm:py-2.5 text-xs sm:text-sm font-semibold text-white hover:brightness-110 cursor-pointer transition-all"
+                className="inline-flex items-center rounded-lg bg-[#4bb9cf] px-4 py-2 sm:px-5 sm:py-2.5 text-xs sm:text-sm font-semibold text-white hover:brightness-110 hover:scale-105 cursor-pointer transition-all"
               >
                 Sell Your Phone
               </Link>
