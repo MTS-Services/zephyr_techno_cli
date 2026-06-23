@@ -47,19 +47,25 @@ const Navbar = () => {
     return () => document.removeEventListener("mousedown", handleDocClick);
   }, []);
 
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [location.pathname]);
+
   return (
     <>
       <Container>
         <div className="navbar px-0!">
           {/* LEFT — hamburger + logo */}
-          <div className="navbar-start">
+          <div className="navbar-start flex items-center gap-4 lg:gap-0">
             {/* Mobile hamburger */}
-            {/* <button
+            <button
+              type="button"
               className="btn btn-ghost btn-circle lg:hidden"
               onClick={() => setSidebarOpen(true)}
+              aria-label="Open menu"
             >
               <FiMenu size={22} />
-            </button> */}
+            </button>
 
             {/* Logo */}
             <Link to="/" className="cursor-pointer">
@@ -165,20 +171,19 @@ const Navbar = () => {
         </div>
 
         {/* Backdrop */}
-        {/* <div
+        <div
           className={`fixed inset-0 bg-black/50 z-40 lg:hidden transition-opacity duration-300
                     ${sidebarOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
           onClick={() => setSidebarOpen(false)}
-        /> */}
+        />
 
         {/* Sidebar */}
-        {/* <div
+        <div
           className={`fixed top-0 left-0 h-full w-72 bg-white z-50 lg:hidden
                     flex flex-col shadow-2xl
                     transition-transform duration-300 ease-in-out
                     ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
         >
-          // Sidebar header
           <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
             <Link to="/" onClick={() => setSidebarOpen(false)} className="p-0">
               <img
@@ -188,14 +193,15 @@ const Navbar = () => {
               />
             </Link>
             <button
+              type="button"
               className="btn btn-ghost btn-circle btn-sm"
               onClick={() => setSidebarOpen(false)}
+              aria-label="Close menu"
             >
               <FiX size={20} />
             </button>
           </div>
 
-          // Sidebar nav links
           <ul className="flex flex-col px-4 py-6 gap-1 flex-1">
             {navLinks.map(({ to, label }) => (
               <li key={to}>
@@ -212,15 +218,36 @@ const Navbar = () => {
             ))}
           </ul>
 
-          // Sidebar bottom buttons
           <div className="flex flex-col gap-3 px-6 py-6 border-t border-gray-100">
-            <Link
-              to="/login"
-              onClick={() => setSidebarOpen(false)}
-              className="btn bg-[#2E395B] hover:bg-[#1C253B] text-white border-none w-full"
-            >
-              Log In / Sign Up
-            </Link>
+            {isAuthenticated ? (
+              <>
+                <Link
+                  to={dashboardPath}
+                  onClick={() => setSidebarOpen(false)}
+                  className="btn bg-[#2E395B] hover:bg-[#1C253B] text-white border-none w-full"
+                >
+                  Dashboard
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSidebarOpen(false);
+                    handleLogout();
+                  }}
+                  className="btn btn-ghost border border-gray-200 w-full text-gray-700"
+                >
+                  Log Out
+                </button>
+              </>
+            ) : (
+              <Link
+                to="/login"
+                onClick={() => setSidebarOpen(false)}
+                className="btn bg-[#2E395B] hover:bg-[#1C253B] text-white border-none w-full"
+              >
+                Log In / Sign Up
+              </Link>
+            )}
             <Link
               to="/sell"
               onClick={() => setSidebarOpen(false)}
@@ -229,7 +256,7 @@ const Navbar = () => {
               Sell Your Phone
             </Link>
           </div>
-        </div> */}
+        </div>
       </Container>
     </>
   );
