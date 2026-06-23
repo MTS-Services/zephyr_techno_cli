@@ -49,6 +49,7 @@ const Addlisting = ({ isEdit = false, listingId = null }) => {
   ]);
   const [colorImages, setColorImages] = useState({});
   const [removedImageIds, setRemovedImageIds] = useState([]);
+  const [deletingImageId, setDeletingImageId] = useState(null);
 
   // Attribute options from API
   const [categories, setCategories] = useState([]);
@@ -343,20 +344,63 @@ const Addlisting = ({ isEdit = false, listingId = null }) => {
     }));
   };
 
-  const handleColorImageRemove = (colorId, index) => {
-    setColorImages((prev) => {
-      const items = prev[colorId] || [];
-      const removed = items[index];
-      if (removed?.id) {
-        setRemovedImageIds((prevRemoved) => [
-          ...new Set([...prevRemoved, removed.id]),
-        ]);
+  const handleColorImageRemove = async (colorId, index) => {
+    const items = colorImages[colorId] || [];
+    const removed = items[index];
+    if (!removed) return;
+
+    if (isEdit && removed.id && listingId) {
+      const result = await Swal.fire({
+        title: "Delete image?",
+        text: "This image will be removed from the listing.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#dc2626",
+        cancelButtonColor: "#6b7280",
+        confirmButtonText: "Delete",
+      });
+      if (!result.isConfirmed) return;
+
+      setDeletingImageId(removed.id);
+      try {
+        const token = localStorage.getItem("token");
+        const res = await fetch(
+          `${API_BASE_URL}/api/admin/products/${listingId}/gallery/${removed.id}`,
+          {
+            method: "DELETE",
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          },
+        );
+        let data = {};
+        try {
+          data = await res.json();
+        } catch {
+          /* empty */
+        }
+        if (!res.ok || data.success === false) {
+          throw new Error(data.message || "Failed to delete image");
+        }
+      } catch (err) {
+        await Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: err.message,
+          confirmButtonColor: "#0891b2",
+        });
+        return;
+      } finally {
+        setDeletingImageId(null);
       }
-      return {
-        ...prev,
-        [colorId]: items.filter((_, i) => i !== index),
-      };
-    });
+    } else if (removed?.id) {
+      setRemovedImageIds((prevRemoved) => [
+        ...new Set([...prevRemoved, removed.id]),
+      ]);
+    }
+
+    setColorImages((prev) => ({
+      ...prev,
+      [colorId]: (prev[colorId] || []).filter((_, i) => i !== index),
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -753,6 +797,7 @@ const Addlisting = ({ isEdit = false, listingId = null }) => {
                   >
                     <ImageUpload
                       images={colorImages[colorId] || []}
+                      deletingImageId={deletingImageId}
                       onFilesAdded={(files) =>
                         handleColorImageAdd(colorId, files)
                       }

@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from 'react';
 
-const ImageUpload = ({ images, onFilesAdded, onRemove }) => {
+const ImageUpload = ({ images, onFilesAdded, onRemove, deletingImageId = null }) => {
     const fileInputRef = useRef(null);
     const [previews, setPreviews] = useState([]);
 
@@ -87,8 +87,16 @@ const ImageUpload = ({ images, onFilesAdded, onRemove }) => {
             {/* Image Previews */}
             {previews.length > 0 && (
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                    {previews.map((preview, index) => (
-                        <div key={index} className="relative group">
+                    {previews.map((preview, index) => {
+                        const imageItem = images[index];
+                        const imageKey =
+                            imageItem?.id ||
+                            imageItem?.file?.name ||
+                            `new-${index}`;
+                        const isDeleting = deletingImageId === imageItem?.id;
+
+                        return (
+                        <div key={imageKey} className="relative group">
                             <img
                                 src={preview}
                                 alt={`Preview ${index + 1}`}
@@ -98,17 +106,23 @@ const ImageUpload = ({ images, onFilesAdded, onRemove }) => {
                                 <button
                                     type="button"
                                     onClick={(e) => handleRemove(index, e)}
-                                    className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 cursor-pointer"
+                                    disabled={isDeleting}
+                                    className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-7 h-7 flex items-center justify-center shadow-md hover:bg-red-600 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                                     title="Remove image"
                                 >
-                                    &#x2715;
+                                    {isDeleting ? (
+                                        <span className="inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                    ) : (
+                                        '×'
+                                    )}
                                 </button>
                             )}
                             <div className="absolute bottom-2 left-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded">
                                 {index + 1}
                             </div>
                         </div>
-                    ))}
+                        );
+                    })}
                 </div>
             )}
         </div>
