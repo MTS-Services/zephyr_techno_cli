@@ -47,7 +47,8 @@ const Addlisting = ({ isEdit = false, listingId = null }) => {
   const [specifications, setSpecifications] = useState([
     { name: "", value: "" },
   ]);
-  const [specImages, setSpecImages] = useState([]);
+  const [colorImages, setColorImages] = useState({});
+  const [removedImageIds, setRemovedImageIds] = useState([]);
 
   // Attribute options from API
   const [categories, setCategories] = useState([]);
@@ -191,7 +192,24 @@ const Addlisting = ({ isEdit = false, listingId = null }) => {
           if (listing.faqs?.length) setFaqs(listing.faqs);
           if (listing.specifications?.length)
             setSpecifications(listing.specifications);
-          // TODO: handle images if API provides them
+
+          const groupedImages = {};
+          (listing.availableColors || []).forEach((color) => {
+            groupedImages[color.id] = [];
+          });
+          const fallbackColorId = listing.availableColors?.[0]?.id;
+          (listing.images || []).forEach((img) => {
+            const colorId = img.colorId || fallbackColorId;
+            if (!colorId) return;
+            if (!groupedImages[colorId]) groupedImages[colorId] = [];
+            groupedImages[colorId].push({
+              id: img.id,
+              imageUrl: img.imageUrl,
+              displayOrder: img.displayOrder,
+            });
+          });
+          setColorImages(groupedImages);
+          setRemovedImageIds([]);
         } catch (err) {
           await Swal.fire({
             icon: "error",
@@ -246,9 +264,34 @@ const Addlisting = ({ isEdit = false, listingId = null }) => {
   const handleMultiToggle = (field, id) => {
     setFormData((prev) => {
       const current = prev[field];
+      const isRemoving = current.includes(id);
+
+      if (field === "colorIds") {
+        if (isRemoving) {
+          const removedExisting = (colorImages[id] || [])
+            .filter((img) => img.id)
+            .map((img) => img.id);
+          if (removedExisting.length > 0) {
+            setRemovedImageIds((prevRemoved) => [
+              ...new Set([...prevRemoved, ...removedExisting]),
+            ]);
+          }
+          setColorImages((prevImages) => {
+            const next = { ...prevImages };
+            delete next[id];
+            return next;
+          });
+        } else {
+          setColorImages((prevImages) => ({
+            ...prevImages,
+            [id]: prevImages[id] || [],
+          }));
+        }
+      }
+
       return {
         ...prev,
-        [field]: current.includes(id)
+        [field]: isRemoving
           ? current.filter((v) => v !== id)
           : [...current, id],
       };
@@ -292,12 +335,28 @@ const Addlisting = ({ isEdit = false, listingId = null }) => {
   const addTechnicalSpec = () =>
     setSpecifications([...specifications, { name: "", value: "" }]);
 
-  const handleImageAdd = (files) => {
-    setSpecImages((prev) => [...prev, ...files]);
+  const handleColorImageAdd = (colorId, files) => {
+    const wrapped = files.map((file) => ({ file }));
+    setColorImages((prev) => ({
+      ...prev,
+      [colorId]: [...(prev[colorId] || []), ...wrapped],
+    }));
   };
 
-  const handleImageRemove = (index) => {
-    setSpecImages((prev) => prev.filter((_, i) => i !== index));
+  const handleColorImageRemove = (colorId, index) => {
+    setColorImages((prev) => {
+      const items = prev[colorId] || [];
+      const removed = items[index];
+      if (removed?.id) {
+        setRemovedImageIds((prevRemoved) => [
+          ...new Set([...prevRemoved, removed.id]),
+        ]);
+      }
+      return {
+        ...prev,
+        [colorId]: items.filter((_, i) => i !== index),
+      };
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -358,10 +417,38 @@ const Addlisting = ({ isEdit = false, listingId = null }) => {
       formDataToSend.append("specifications", JSON.stringify(specifications));
       formDataToSend.append("highlights", JSON.stringify([]));
 
-      // Append images
-      specImages.forEach((file) => {
+      const newFiles = [];
+      const imageMeta = [];
+      const keptImages = [];
+
+      formData.colorIds.forEach((colorId) => {
+        (colorImages[colorId] || []).forEach((item, index) => {
+          if (item.file) {
+            newFiles.push(item.file);
+            imageMeta.push({ colorId, displayOrder: index });
+          } else if (item.id) {
+            keptImages.push({
+              id: item.id,
+              colorId,
+              displayOrder: index,
+            });
+          }
+        });
+      });
+
+      newFiles.forEach((file) => {
         formDataToSend.append("images", file);
       });
+      if (imageMeta.length > 0) {
+        formDataToSend.append("imageMeta", JSON.stringify(imageMeta));
+      }
+      if (isEdit) {
+        formDataToSend.append("keptImages", JSON.stringify(keptImages));
+        formDataToSend.append(
+          "removedImageIds",
+          JSON.stringify(removedImageIds),
+        );
+      }
 
       const url = isEdit
         ? `${API_BASE_URL}/api/admin/products/${listingId}`
@@ -648,13 +735,36 @@ const Addlisting = ({ isEdit = false, listingId = null }) => {
         </div>
 
         <div className="mb-8">
-          <FormField label="Specification Images">
-            <ImageUpload
-              images={specImages}
-              onFilesAdded={handleImageAdd}
-              onRemove={handleImageRemove}
-            />
-          </FormField>
+          <h2 className="text-base font-semibold text-gray-900 mb-3">
+            Product Images by Color
+          </h2>
+          {formData.colorIds.length === 0 ? (
+            <p className="text-sm text-gray-400">
+              Select at least one color to upload images.
+            </p>
+          ) : (
+            <div className="space-y-6">
+              {formData.colorIds.map((colorId) => {
+                const color = colors.find((c) => c.id === colorId);
+                return (
+                  <FormField
+                    key={colorId}
+                    label={`${color?.name || "Color"} Images`}
+                  >
+                    <ImageUpload
+                      images={colorImages[colorId] || []}
+                      onFilesAdded={(files) =>
+                        handleColorImageAdd(colorId, files)
+                      }
+                      onRemove={(index) =>
+                        handleColorImageRemove(colorId, index)
+                      }
+                    />
+                  </FormField>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         <button

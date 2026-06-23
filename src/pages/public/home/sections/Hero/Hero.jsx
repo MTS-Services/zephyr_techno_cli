@@ -1,6 +1,6 @@
 import React from "react";
 import banner from "../../../../../../src/assets/banner/hero.webp";
-import mobileBanner from "../../../../../../src/assets/banner/mobilebanner.jpg";
+import mobileBanner from "../../../../../../src/assets/banner/mobilebanner2.jpg";
 import { Link } from "react-router";
 import Container from "../../../../../layout/Container";
 

@@ -5,10 +5,16 @@ const ImageUpload = ({ images, onFilesAdded, onRemove }) => {
     const [previews, setPreviews] = useState([]);
 
     useEffect(() => {
-        // Create preview URLs for File objects
+        // Create preview URLs for File objects or existing image URLs
         const newPreviews = images.map((img) => {
             if (img instanceof File) {
                 return URL.createObjectURL(img);
+            }
+            if (img && typeof img === 'object' && img.imageUrl) {
+                return img.imageUrl;
+            }
+            if (img && typeof img === 'object' && img.file instanceof File) {
+                return URL.createObjectURL(img.file);
             }
             // If it's already a URL string (from API)
             return img;

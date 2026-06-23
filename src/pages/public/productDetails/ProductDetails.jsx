@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useParams, Link, useNavigate } from "react-router";
 import Container from "../../../layout/Container";
 import {
@@ -52,6 +52,21 @@ const ProductDetails = () => {
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }, [id]);
+
+  useEffect(() => {
+    setSelectedImage(0);
+  }, [selectedColor]);
+
+  const images = useMemo(() => {
+    if (!product?.images) return [];
+    const sorted = [...product.images].sort(
+      (a, b) => a.displayOrder - b.displayOrder,
+    );
+    if (!selectedColor) return sorted;
+    const colorSpecific = sorted.filter((img) => img.colorId === selectedColor);
+    if (colorSpecific.length > 0) return colorSpecific;
+    return sorted.filter((img) => !img.colorId);
+  }, [product, selectedColor]);
 
   if (loading) {
     return (
@@ -107,9 +122,12 @@ const ProductDetails = () => {
     }
   };
 
-  const images = [...product.images].sort((a, b) => a.displayOrder - b.displayOrder);
-  const highlights = [...product.highlights].sort((a, b) => a.displayOrder - b.displayOrder);
-  const specifications = [...product.specifications].sort((a, b) => a.displayOrder - b.displayOrder);
+  const highlights = product
+    ? [...product.highlights].sort((a, b) => a.displayOrder - b.displayOrder)
+    : [];
+  const specifications = product
+    ? [...product.specifications].sort((a, b) => a.displayOrder - b.displayOrder)
+    : [];
 
   return (
     <div className="min-h-screen bg-white pb-20">
@@ -196,7 +214,10 @@ const ProductDetails = () => {
                   {product.availableColors.map((c) => (
                     <button
                       key={c.id}
-                      onClick={() => setSelectedColor(c.id)}
+                      onClick={() => {
+                        setSelectedColor(c.id);
+                        setSelectedImage(0);
+                      }}
                       className={`px-3 py-1.5 rounded-sm text-[12px] border transition-colors ${
                         selectedColor === c.id
                           ? "border-[#151A2A] text-[#151A2A] bg-gray-50"
