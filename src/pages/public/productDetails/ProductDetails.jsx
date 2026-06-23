@@ -12,6 +12,7 @@ import {
 import RelatedProducts from "./sections/relatedProduct/RelatedProducts";
 import { useCart } from "../../../context/CartContext";
 import Swal from 'sweetalert2';
+import { getColorHex, isLightColor } from '../../../utils/color';
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
@@ -203,30 +204,39 @@ const ProductDetails = () => {
 
             {/* Color */}
             {product.availableColors?.length > 0 && (
-              <div className="mb-6">
-                <p className="text-[11px] font-bold tracking-widest text-[#151A2A] uppercase mb-2">
-                  COLOR:{" "}
-                  <span className="text-[#9CA3AF] font-normal">
-                    {product.availableColors.find((c) => c.id === selectedColor)?.name}
-                  </span>
+              <div className="mb-6 pb-4 border-b border-gray-200">
+                <p className="text-[11px] font-bold tracking-widest text-[#151A2A] uppercase mb-3">
+                  COLOR
                 </p>
-                <div className="flex flex-wrap gap-2">
-                  {product.availableColors.map((c) => (
-                    <button
-                      key={c.id}
-                      onClick={() => {
-                        setSelectedColor(c.id);
-                        setSelectedImage(0);
-                      }}
-                      className={`px-3 py-1.5 rounded-sm text-[12px] border transition-colors ${
-                        selectedColor === c.id
-                          ? "border-[#151A2A] text-[#151A2A] bg-gray-50"
-                          : "border-gray-300 text-gray-500 hover:border-gray-400"
-                      }`}
-                    >
-                      {c.name}
-                    </button>
-                  ))}
+                <div className="flex flex-wrap gap-3 items-center">
+                  {product.availableColors.map((c) => {
+                    const hex = getColorHex(c.name);
+                    const isSelected = selectedColor === c.id;
+                    return (
+                      <button
+                        key={c.id}
+                        type="button"
+                        title={c.name}
+                        aria-label={c.name}
+                        aria-pressed={isSelected}
+                        onClick={() => {
+                          setSelectedColor(c.id);
+                          setSelectedImage(0);
+                        }}
+                        className={`w-8 h-8 rounded-full transition-all shrink-0 ${
+                          isSelected
+                            ? 'ring-2 ring-[#151A2A] ring-offset-2 scale-105'
+                            : 'hover:scale-105'
+                        } ${isLightColor(hex) ? 'border border-gray-300' : ''}`}
+                        style={{
+                          backgroundColor: hex,
+                          boxShadow: isLightColor(hex)
+                            ? 'inset 0 0 0 1px #e5e7eb'
+                            : 'none',
+                        }}
+                      />
+                    );
+                  })}
                 </div>
               </div>
             )}
