@@ -1,4 +1,5 @@
 import { FormField, TextInput, SelectInput, Modal } from '../../../../components/shared/form';
+import ColorHexInput from './ColorHexInput';
 
 const AddModal = ({ title, isOpen, fields, values, onChange, onSubmit, onClose }) => (
     <Modal isOpen={isOpen} onClose={onClose} title={title}>
@@ -18,6 +19,12 @@ const AddModal = ({ title, isOpen, fields, values, onChange, onSubmit, onClose }
                             onChange={onChange}
                             options={field.options || []}
                             placeholder={field.placeholder || 'Select...'}
+                        />
+                    ) : field.type === 'colorHex' ? (
+                        <ColorHexInput
+                            name={field.name}
+                            value={values[field.name] || '#9CA3AF'}
+                            onChange={onChange}
                         />
                     ) : field.type === 'file' ? (
                         <TextInput

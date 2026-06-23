@@ -16,6 +16,22 @@ import { getColorHex, isLightColor } from '../../../utils/color';
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
+function sortImages(images = []) {
+  return [...images].sort((a, b) => a.displayOrder - b.displayOrder);
+}
+
+function getImageIndexForColor(images, colorId) {
+  const sorted = sortImages(images);
+  if (!sorted.length) return 0;
+  if (!colorId) return 0;
+
+  const colorIdx = sorted.findIndex((img) => img.colorId === colorId);
+  if (colorIdx >= 0) return colorIdx;
+
+  const sharedIdx = sorted.findIndex((img) => !img.colorId);
+  return sharedIdx >= 0 ? sharedIdx : 0;
+}
+
 const ProductDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -44,34 +60,23 @@ const ProductDetails = () => {
       })
       .then((json) => {
         const data = json.data;
+        const firstColorId = data.availableColors?.[0]?.id ?? null;
         setProduct(data);
-        setSelectedColor(data.availableColors?.[0]?.id ?? null);
+        setSelectedColor(firstColorId);
         setSelectedStorage(data.availableStorageOptions?.[0]?.id ?? null);
         setSelectedRam(data.availableRamOptions?.[0]?.id ?? null);
-        setSelectedImage(0);
+        setSelectedImage(getImageIndexForColor(data.images, firstColorId));
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }, [id]);
 
-  useEffect(() => {
-    if (!product?.images?.length || !selectedColor) return;
-    const sorted = [...product.images].sort(
-      (a, b) => a.displayOrder - b.displayOrder,
-    );
-    const colorIdx = sorted.findIndex((img) => img.colorId === selectedColor);
-    if (colorIdx >= 0) {
-      setSelectedImage(colorIdx);
-      return;
-    }
-    const sharedIdx = sorted.findIndex((img) => !img.colorId);
-    setSelectedImage(sharedIdx >= 0 ? sharedIdx : 0);
-  }, [selectedColor, product?.id]);
+  const allImages = useMemo(() => sortImages(product?.images), [product]);
 
-  const allImages = useMemo(() => {
-    if (!product?.images) return [];
-    return [...product.images].sort((a, b) => a.displayOrder - b.displayOrder);
-  }, [product]);
+  const selectColor = (colorId) => {
+    setSelectedColor(colorId);
+    setSelectedImage(getImageIndexForColor(product?.images, colorId));
+  };
 
   if (loading) {
     return (
@@ -157,8 +162,11 @@ const ProductDetails = () => {
                   <button
                     key={img.id}
                     onClick={() => {
-                      setSelectedImage(idx);
-                      if (img.colorId) setSelectedColor(img.colorId);
+                      if (img.colorId) {
+                        selectColor(img.colorId);
+                      } else {
+                        setSelectedImage(idx);
+                      }
                     }}
                     className={`aspect-4/3 rounded-lg border-2 overflow-hidden transition-all p-0.5 ${
                       selectedImage === idx
@@ -217,7 +225,7 @@ const ProductDetails = () => {
                 </p>
                 <div className="flex flex-wrap gap-3 items-center">
                   {product.availableColors.map((c) => {
-                    const hex = getColorHex(c.name);
+                    const hex = getColorHex(c.name, c.hexCode);
                     const isSelected = selectedColor === c.id;
                     return (
                       <button
@@ -226,9 +234,7 @@ const ProductDetails = () => {
                         title={c.name}
                         aria-label={c.name}
                         aria-pressed={isSelected}
-                      onClick={() => {
-                        setSelectedColor(c.id);
-                      }}
+                      onClick={() => selectColor(c.id)}
                         className={`w-8 h-8 rounded-full transition-all shrink-0 ${
                           isSelected
                             ? 'ring-2 ring-[#151A2A] ring-offset-2 scale-105'

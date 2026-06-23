@@ -386,6 +386,7 @@
 
 
 import React, { useState } from "react";
+import { getColorHex, isLightColor } from "../../../../utils/color";
 
 function FilterSection({ title, children }) {
   const [open, setOpen] = useState(true);
@@ -435,20 +436,6 @@ const Filter = ({
   const [usedOpen, setUsedOpen] = useState(true);
 
   const apply = () => { if (onApply) onApply(); };
-
-  const getColorHex = (colorName) => {
-    const colorMap = {
-      'black': '#1a1a1a', 'midnight black': '#1a1a1a',
-      'white': '#f0ede8', 'starlight': '#f0ede8',
-      'yellow': '#f5d76e', 'blue': '#6ab0e8',
-      'blue titanium': '#4a6fa5', 'purple': '#6b3fa0',
-      'pink': '#e8b4b8', 'rose gold': '#e8b4b8',
-      'natural titanium': '#8b8681', 'gold': '#f9d77e',
-      'silver': '#e5e5e5', 'green': '#4a7c59',
-      'red': '#d32f2f', 'midnight': '#1a1a2e',
-    };
-    return colorMap[colorName?.toLowerCase().trim() || ''] || '#000000';
-  };
 
   const categoryFilters = attributes?.categoryFilters || [];
   const seriesList = attributes?.series || [];
@@ -637,11 +624,14 @@ const Filter = ({
               <FilterSection title="Color">
                 <div className="flex flex-wrap gap-2">
                   {colorsList.map((c) => {
-                    const hex = getColorHex(c.name);
+                    const hex = getColorHex(c.name, c.hexCode);
                     return (
                       <button key={c.id} title={c.name} onClick={() => { setColorId(colorId === c.id ? null : c.id); apply(); }}
-                        className={`w-6 h-6 rounded-full border-2 transition-all ${colorId === c.id ? "border-custom scale-110" : "border-transparent hover:scale-105"}`}
-                        style={{ backgroundColor: hex, boxShadow: hex === "#f0ede8" ? "inset 0 0 0 1px #e5e7eb" : "none" }}
+                        className={`w-6 h-6 rounded-full border-2 transition-all ${colorId === c.id ? "border-custom scale-110" : "border-transparent hover:scale-105"} ${isLightColor(hex) ? "border-gray-300" : ""}`}
+                        style={{
+                          backgroundColor: hex,
+                          boxShadow: isLightColor(hex) ? "inset 0 0 0 1px #e5e7eb" : "none",
+                        }}
                       />
                     );
                   })}

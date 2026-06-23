@@ -6,6 +6,7 @@ import AddModal from './components/AddModal';
 import ConditionPriceTable from './components/ConditionPriceTable';
 import { INITIAL_SETTINGS, SECTIONS } from './constants';
 import AdminDashboardTitle from '../../../components/dashboards/AdminDashboardTitle';
+import { getColorHex } from '../../../utils/color';
 
 const Settings = () => {
     // Start with no fallback categories/series/models/conditions — they'll be loaded from the API
@@ -174,6 +175,7 @@ const Settings = () => {
                 const normalized = data.map((color) => ({
                     id: color.id || color._id || color.uuid || null,
                     name: color.name || color.title || String(color),
+                    hexCode: color.hexCode || null,
                 }));
 
                 setSettings((prev) => ({ ...prev, colors: normalized }));
@@ -246,10 +248,23 @@ const Settings = () => {
                 { name: 'image', label: 'Series Image', type: 'file', accept: 'image/*' },
             ];
             setActiveSection({ ...section, fields, modalTitle: 'Add Series', valueKey: 'value' });
+        } else if (section.key === 'colors') {
+            setActiveSection({
+                ...section,
+                modalTitle: 'Add Color',
+                valueKey: 'value',
+                fields: [
+                    { name: 'value', label: 'Color Name', placeholder: 'e.g. Rose Gold' },
+                    { name: 'hexCode', label: 'Color Code', type: 'colorHex' },
+                ],
+            });
+            setModalValues({ hexCode: '#9CA3AF', hexCodeManuallySet: false });
         } else {
             setActiveSection(section);
         }
-        setModalValues({});
+        if (section.key !== 'colors') {
+            setModalValues({});
+        }
     };
 
     const handleCloseModal = () => {
@@ -261,9 +276,30 @@ const Settings = () => {
         const { name, value, type, files } = e.target;
         if (type === 'file') {
             setModalValues((prev) => ({ ...prev, [name]: files?.[0] || null }));
-        } else {
-            setModalValues((prev) => ({ ...prev, [name]: value }));
+            return;
         }
+
+        if (activeSection?.key === 'colors' && name === 'value') {
+            setModalValues((prev) => ({
+                ...prev,
+                value,
+                hexCode: prev.hexCodeManuallySet
+                    ? prev.hexCode
+                    : getColorHex(value),
+            }));
+            return;
+        }
+
+        if (activeSection?.key === 'colors' && name === 'hexCode') {
+            setModalValues((prev) => ({
+                ...prev,
+                hexCode: value,
+                hexCodeManuallySet: true,
+            }));
+            return;
+        }
+
+        setModalValues((prev) => ({ ...prev, [name]: value }));
     };
 
     const handleModalSubmit = async () => {
@@ -521,7 +557,10 @@ const Settings = () => {
                             'Content-Type': 'application/json',
                             ...(token ? { Authorization: `Bearer ${token}` } : {}),
                         },
-                        body: JSON.stringify({ name: newValue }),
+                        body: JSON.stringify({
+                            name: newValue,
+                            hexCode: modalValues.hexCode || getColorHex(newValue),
+                        }),
                     });
 
                     if (!res.ok) {
@@ -534,6 +573,7 @@ const Settings = () => {
                     const item = {
                         id: created.id || created._id || created.uuid || null,
                         name: created.name || created.title || newValue,
+                        hexCode: created.hexCode || modalValues.hexCode || null,
                     };
 
                     setSettings((prev) => ({
@@ -776,6 +816,8 @@ const Settings = () => {
                         <Tag
                             key={`${label}-${index}`}
                             label={label}
+                            hexCode={isString ? null : item?.hexCode}
+                            showColorSwatch={section.key === 'colors'}
                             onDelete={
                                 section.key === 'categories'
                                     ? undefined
