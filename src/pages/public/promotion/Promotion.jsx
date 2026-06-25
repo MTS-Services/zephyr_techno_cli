@@ -1,6 +1,6 @@
 import React from "react";
 import promotion from "../../../assets/banner/promotions.webp";
-import mobileBanner from "../../../assets/banner/sell_your_phone2.jpg";
+import mobileBanner from "../../../assets/banner/sell_your_phone2.png";
 import { Link } from "react-router";
 import Container from "../../../layout/Container";
 
