@@ -8,6 +8,9 @@ import {
   FiChevronUp,
   FiCheckCircle,
   FiTruck,
+  FiPackage,
+  FiLock,
+  FiHeadphones,
 } from "react-icons/fi";
 import RelatedProducts from "./sections/relatedProduct/RelatedProducts";
 import { useCart } from "../../../context/CartContext";
@@ -15,6 +18,38 @@ import Swal from 'sweetalert2';
 import { getColorHex, isLightColor } from '../../../utils/color';
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
+
+const TRUST_BADGES = [
+  { label: 'Genuine Devices', icon: FiCheckCircle },
+  { label: 'Factory Sealed', icon: FiPackage },
+  { label: 'Fast UK Delivery', icon: FiTruck },
+  { label: 'Secure Checkout', icon: FiLock },
+];
+
+const WHY_CHOOSE_ITEMS = [
+  {
+    title: 'Genuine Devices',
+    description:
+      'Every device is 100% genuine and sourced from trusted suppliers.',
+    icon: FiCheckCircle,
+  },
+  {
+    title: 'Brand New & Factory Sealed',
+    description:
+      'New devices arrive factory sealed unless stated otherwise.',
+    icon: FiPackage,
+  },
+  {
+    title: 'Fast UK Delivery',
+    description: 'Tracked UK delivery with secure packaging.',
+    icon: FiTruck,
+  },
+  {
+    title: 'Dedicated Customer Support',
+    description: 'Friendly support before and after your purchase.',
+    icon: FiHeadphones,
+  },
+];
 
 function sortImages(images = []) {
   return [...images].sort((a, b) => a.displayOrder - b.displayOrder);
@@ -138,6 +173,11 @@ const ProductDetails = () => {
   const specifications = product
     ? [...product.specifications].sort((a, b) => a.displayOrder - b.displayOrder)
     : [];
+  const includedItems = product
+    ? [...(product.includedItems || [])].sort(
+        (a, b) => a.displayOrder - b.displayOrder,
+      )
+    : [];
 
   return (
     <div className="min-h-screen bg-white pb-20">
@@ -205,6 +245,20 @@ const ProductDetails = () => {
               {product.stockQuantity === 0 && (
                 <p className="text-sm text-red-500 mt-1">Out of stock</p>
               )}
+
+              <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                {TRUST_BADGES.map(({ label, icon: Icon }) => (
+                  <div
+                    key={label}
+                    className="flex items-center gap-2 rounded-md border border-gray-200 bg-[#F8FAFC] px-3 py-2"
+                  >
+                    <Icon className="shrink-0 text-custom" size={16} />
+                    <span className="text-[11px] sm:text-xs font-medium text-[#475569] leading-tight">
+                      {label}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
 
             {/* Condition */}
@@ -378,7 +432,7 @@ const ProductDetails = () => {
 
         {/* ── TECHNICAL SPECS ── */}
         {specifications.length > 0 && (
-          <div className="mb-24">
+          <div className="mb-16">
             <h2 className="text-xl font-bold text-[#151A2A] mb-8">
               Technical Specifications
             </h2>
@@ -398,42 +452,48 @@ const ProductDetails = () => {
           </div>
         )}
 
+        {includedItems.length > 0 && (
+          <div className="mb-24">
+            <h2 className="text-xl font-bold text-[#151A2A] mb-8">
+              What&apos;s Included
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
+              {includedItems.map((item) => (
+                <div
+                  key={item.id}
+                  className="bg-[#F0F4F6] px-5 py-3.5 rounded flex items-center gap-3 md:col-start-1"
+                >
+                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-custom" />
+                  <span className="text-base font-medium text-[#171C1E]">
+                    {item.label}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* ── WHY CHOOSE & FAQ ── */}
         <div className="flex flex-col lg:flex-row gap-10 lg:gap-16">
           {/* Left: Why Choose */}
           <div className="flex-1">
             <h2 className="text-xl font-semibold text-[#151A2A] mb-6">
-              Why Choose ZEPHYR?
+              Why Choose Zephyr Technology?
             </h2>
             <div className="space-y-6">
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-full bg-[#e8f6f8] flex items-center justify-center shrink-0 text-custom">
-                  <FiCheckCircle size={20} />
+              {WHY_CHOOSE_ITEMS.map(({ title, description, icon: Icon }) => (
+                <div key={title} className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-full bg-[#e8f6f8] flex items-center justify-center shrink-0 text-custom">
+                    <Icon size={20} />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-[#151A2A] mb-1.5">
+                      {title}
+                    </h3>
+                    <p className="text-base text-[#64748B]">{description}</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-base font-bold text-[#151A2A] mb-1.5">
-                    Authentic Products
-                  </h3>
-                  <p className="text-base text-[#64748B]">
-                    We guarantee 100% genuine products sourced directly from
-                    authorized channels.
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-full bg-[#e8f6f8] flex items-center justify-center shrink-0 text-custom">
-                  <FiTruck size={20} />
-                </div>
-                <div>
-                  <h3 className="text-base font-bold text-[#151A2A] mb-1.5">
-                    Express Delivery
-                  </h3>
-                  <p className="text-base text-[#64748B]">
-                    Get your device within 24-48 hours with our premium
-                    logistics partners.
-                  </p>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
 

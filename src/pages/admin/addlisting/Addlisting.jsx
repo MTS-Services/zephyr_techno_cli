@@ -9,6 +9,7 @@ import SelectInput from "./components/SelectInput";
 import Textarea from "./components/Textarea";
 import FaqItem from "./components/FaqItem";
 import TechnicalSpecItem from "./components/TechnicalSpecItem";
+import IncludedItem from "./components/IncludedItem";
 import ImageUpload from "./components/ImageUpload";
 import {
   CATEGORY_OPTIONS,
@@ -47,6 +48,7 @@ const Addlisting = ({ isEdit = false, listingId = null }) => {
   const [specifications, setSpecifications] = useState([
     { name: "", value: "" },
   ]);
+  const [includedItems, setIncludedItems] = useState([{ label: "" }]);
   const [colorImages, setColorImages] = useState({});
   const [removedImageIds, setRemovedImageIds] = useState([]);
   const [deletingImageId, setDeletingImageId] = useState(null);
@@ -193,6 +195,8 @@ const Addlisting = ({ isEdit = false, listingId = null }) => {
           if (listing.faqs?.length) setFaqs(listing.faqs);
           if (listing.specifications?.length)
             setSpecifications(listing.specifications);
+          if (listing.includedItems?.length)
+            setIncludedItems(listing.includedItems);
 
           const groupedImages = {};
           (listing.availableColors || []).forEach((color) => {
@@ -336,6 +340,19 @@ const Addlisting = ({ isEdit = false, listingId = null }) => {
   const addTechnicalSpec = () =>
     setSpecifications([...specifications, { name: "", value: "" }]);
 
+  const handleIncludedLabelChange = (index, value) => {
+    const updated = [...includedItems];
+    updated[index].label = value;
+    setIncludedItems(updated);
+  };
+
+  const handleRemoveIncludedItem = (index) => {
+    setIncludedItems((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const addIncludedItem = () =>
+    setIncludedItems([...includedItems, { label: "" }]);
+
   const handleColorImageAdd = (colorId, files) => {
     const wrapped = files.map((file) => ({ file }));
     setColorImages((prev) => ({
@@ -459,6 +476,10 @@ const Addlisting = ({ isEdit = false, listingId = null }) => {
       );
       formDataToSend.append("faqs", JSON.stringify(faqs));
       formDataToSend.append("specifications", JSON.stringify(specifications));
+      formDataToSend.append(
+        "includedItems",
+        JSON.stringify(includedItems.filter((item) => item.label?.trim())),
+      );
       formDataToSend.append("highlights", JSON.stringify([]));
 
       const newFiles = [];
@@ -775,6 +796,28 @@ const Addlisting = ({ isEdit = false, listingId = null }) => {
             className="text-sm text-teal-600 hover:text-teal-700 font-medium mt-1 cursor-pointer"
           >
             Add Another Specification
+          </button>
+        </div>
+
+        <div className="mb-6">
+          <h2 className="text-base font-semibold text-gray-900 mb-3">
+            What&apos;s Included
+          </h2>
+          {includedItems.map((item, index) => (
+            <IncludedItem
+              key={index}
+              index={index}
+              item={item}
+              onLabelChange={handleIncludedLabelChange}
+              onRemove={handleRemoveIncludedItem}
+            />
+          ))}
+          <button
+            type="button"
+            onClick={addIncludedItem}
+            className="text-sm text-teal-600 hover:text-teal-700 font-medium mt-1 cursor-pointer"
+          >
+            Add Another Item
           </button>
         </div>
 
