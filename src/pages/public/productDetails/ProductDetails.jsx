@@ -405,7 +405,7 @@ const ProductDetails = () => {
             <h2 className="title-custom text-[#151A2A] mb-4">
               About the {product.title}
             </h2>
-            <p className="subtitle-custom">{product.introduction}</p>
+            <p className="subtitle-custom whitespace-pre-line">{product.introduction}</p>
           </div>
         )}
 
@@ -523,7 +523,7 @@ const ProductDetails = () => {
                       )}
                     </button>
                     {activeFaq === idx && (
-                      <div className="p-4 pt-0 text-base text-[#64748B] leading-relaxed border-t border-gray-100">
+                      <div className="p-4 pt-0 text-base text-[#64748B] leading-relaxed border-t border-gray-100 whitespace-pre-line">
                         {faq.answer}
                       </div>
                     )}

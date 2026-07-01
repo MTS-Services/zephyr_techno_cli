@@ -1,4 +1,5 @@
 import TextInput from './TextInput';
+import Textarea from './Textarea';
 
 const FaqItem = ({ index, faq, onQuestionChange, onAnswerChange, onRemove }) => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3 pb-3 border-b border-gray-200">
@@ -12,11 +13,13 @@ const FaqItem = ({ index, faq, onQuestionChange, onAnswerChange, onRemove }) => 
         </div>
         <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Answer</label>
-            <div className="flex gap-2">
-                <TextInput
+            <div className="flex gap-2 items-start">
+                <Textarea
                     placeholder="Write answer"
                     value={faq.answer}
                     onChange={(e) => onAnswerChange(index, e.target.value)}
+                    rows={3}
+                    className="resize-y"
                 />
                 {index > 0 && (
                     <button

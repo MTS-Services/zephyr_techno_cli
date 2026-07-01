@@ -421,7 +421,7 @@ const Addlisting = ({ isEdit = false, listingId = null }) => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e?.preventDefault?.();
 
     // Client-side validation
     const required = [
@@ -560,6 +560,11 @@ const Addlisting = ({ isEdit = false, listingId = null }) => {
     }
   };
 
+  const handleFormKeyDown = (e) => {
+    if (e.key !== 'Enter' || e.target.tagName === 'TEXTAREA') return;
+    e.preventDefault();
+  };
+
   if (loading && isEdit) {
     return (
       <div className="bg-gray-50 min-h-screen flex items-center justify-center">
@@ -582,7 +587,7 @@ const Addlisting = ({ isEdit = false, listingId = null }) => {
         </Link>
       </div>
 
-      <form onSubmit={handleSubmit} className="pb-10">
+      <form onSubmit={handleSubmit} onKeyDown={handleFormKeyDown} className="pb-10">
         <AdminDashboardTitle
           title={isEdit ? "Edit Listing" : "Add New Listing"}
         />
@@ -856,7 +861,8 @@ const Addlisting = ({ isEdit = false, listingId = null }) => {
         </div>
 
         <button
-          type="submit"
+          type="button"
+          onClick={handleSubmit}
           disabled={loading}
           className="btn-custom text-white text-sm font-medium py-2 px-6 rounded-md transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         >
