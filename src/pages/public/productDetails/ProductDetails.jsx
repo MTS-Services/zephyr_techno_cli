@@ -11,6 +11,7 @@ import {
   FiPackage,
   FiLock,
   FiHeadphones,
+  FiCreditCard,
 } from "react-icons/fi";
 import RelatedProducts from "./sections/relatedProduct/RelatedProducts";
 import { useCart } from "../../../context/CartContext";
@@ -24,6 +25,7 @@ const TRUST_BADGES = [
   { label: 'Factory Sealed', icon: FiPackage },
   { label: 'Fast UK Delivery', icon: FiTruck },
   { label: 'Secure Checkout', icon: FiLock },
+  { label: 'Secure Payment', icon: FiCreditCard },
 ];
 
 const WHY_CHOOSE_ITEMS = [
@@ -46,7 +48,7 @@ const WHY_CHOOSE_ITEMS = [
   },
   {
     title: 'Dedicated Customer Support',
-    description: 'Friendly support before and after your purchase.',
+    description: 'Our Team Is Here To Assist You Before. During And After Your Purchase.',
     icon: FiHeadphones,
   },
 ];
@@ -246,14 +248,14 @@ const ProductDetails = () => {
                 <p className="text-sm text-red-500 mt-1">Out of stock</p>
               )}
 
-              <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+              <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-3 lg:grid-cols-5">
                 {TRUST_BADGES.map(({ label, icon: Icon }) => (
                   <div
                     key={label}
-                    className="flex items-center gap-2 rounded-md border border-gray-200 bg-[#F8FAFC] px-3 py-2"
+                    className="flex items-center justify-center gap-1.5 rounded-md border border-gray-200 bg-[#F8FAFC] px-2 py-2"
                   >
-                    <Icon className="shrink-0 text-custom" size={16} />
-                    <span className="text-[11px] sm:text-xs font-medium text-[#475569] leading-tight">
+                    <Icon className="shrink-0 text-custom" size={14} />
+                    <span className="text-[10px] sm:text-[11px] font-medium text-[#151617] leading-none whitespace-nowrap">
                       {label}
                     </span>
                   </div>
