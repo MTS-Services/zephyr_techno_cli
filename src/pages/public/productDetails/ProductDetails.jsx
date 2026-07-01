@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useParams, Link, useNavigate } from "react-router";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Container from "../../../layout/Container";
 import {
   FiMinus,
   FiPlus,
   FiChevronDown,
-  FiChevronUp,
   FiCheckCircle,
   FiTruck,
   FiPackage,
@@ -19,6 +19,8 @@ import Swal from 'sweetalert2';
 import { getColorHex, isLightColor } from '../../../utils/color';
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
+
+const FAQ_TRANSITION = { duration: 0.25, ease: [0.4, 0, 0.2, 1] };
 
 const TRUST_BADGES = [
   { label: 'Genuine Devices', icon: FiCheckCircle },
@@ -85,6 +87,7 @@ const ProductDetails = () => {
   const [selectedRam, setSelectedRam] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [activeFaq, setActiveFaq] = useState(null);
+  const prefersReducedMotion = useReducedMotion();
 
   useEffect(() => {
     if (!id) return;
@@ -403,33 +406,37 @@ const ProductDetails = () => {
 
         {/* ── INTRODUCTION ── */}
         {product.introduction && (
-          <div className="text-center mb-16 max-w-3xl mx-auto">
+          <section className="mb-16 lg:mb-20 max-w-3xl mx-auto text-center px-2">
             <h2 className="title-custom text-[#151A2A] mb-4">
               About the {product.title}
             </h2>
-            <p className="subtitle-custom whitespace-pre-line">{product.introduction}</p>
-          </div>
+            <p className="subtitle-custom whitespace-pre-line text-[#64748B] leading-relaxed">
+              {product.introduction}
+            </p>
+          </section>
         )}
 
         {/* ── HIGHLIGHTS ── */}
         {highlights.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-24">
-            {highlights.map((h) => (
-              <div key={h.id} className="bg-[#F0F4F6] rounded-2xl p-8">
-                {h.iconUrl ? (
-                  <img src={h.iconUrl} alt={h.title} className="w-6 h-6 mb-4" />
-                ) : (
-                  <div className="w-6 h-6 mb-4 rounded-full bg-custom/20" />
-                )}
-                <h3 className="text-base font-bold text-[#595E71] mb-2">
-                  {h.title}
-                </h3>
-                <p className="text-sm text-[#64748B] leading-relaxed">
-                  {h.description}
-                </p>
-              </div>
-            ))}
-          </div>
+          <section className="mb-16 lg:mb-20">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 lg:gap-6">
+              {highlights.map((h) => (
+                <div key={h.id} className="bg-[#F0F4F6] rounded-2xl p-6 lg:p-8 h-full">
+                  {h.iconUrl ? (
+                    <img src={h.iconUrl} alt={h.title} className="w-6 h-6 mb-4" />
+                  ) : (
+                    <div className="w-6 h-6 mb-4 rounded-full bg-custom/20" />
+                  )}
+                  <h3 className="text-base font-bold text-[#595E71] mb-2">
+                    {h.title}
+                  </h3>
+                  <p className="text-sm text-[#64748B] leading-relaxed">
+                    {h.description}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </section>
         )}
 
         {/* ── TECHNICAL SPECS ── */}
@@ -455,86 +462,126 @@ const ProductDetails = () => {
         )}
 
         {includedItems.length > 0 && (
-          <div className="mb-24">
-            <h2 className="text-xl font-bold text-[#151A2A] mb-8">
+          <section className="mb-16 lg:mb-20">
+            <h2 className="text-xl lg:text-2xl font-bold text-[#151A2A] mb-6 lg:mb-8">
               What&apos;s Included
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 lg:gap-4">
               {includedItems.map((item) => (
                 <div
                   key={item.id}
-                  className="bg-[#F0F4F6] px-5 py-3.5 rounded flex items-center gap-3 md:col-start-1"
+                  className="bg-[#F8FAFC] border border-gray-100 rounded-xl px-5 py-4 flex items-center gap-3"
                 >
-                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-custom" />
-                  <span className="text-base font-medium text-[#171C1E]">
+                  <span className="h-2 w-2 shrink-0 rounded-full bg-custom" />
+                  <span className="text-base font-medium text-[#151A2A]">
                     {item.label}
                   </span>
                 </div>
               ))}
             </div>
-          </div>
+          </section>
         )}
 
         {/* ── WHY CHOOSE & FAQ ── */}
-        <div className="flex flex-col lg:flex-row gap-10 lg:gap-16">
-          {/* Left: Why Choose */}
-          <div className="flex-1">
-            <h2 className="text-xl font-semibold text-[#151A2A] mb-6">
-              Why Choose Zephyr Technology?
-            </h2>
-            <div className="space-y-6">
-              {WHY_CHOOSE_ITEMS.map(({ title, description, icon: Icon }) => (
-                <div key={title} className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-full bg-[#e8f6f8] flex items-center justify-center shrink-0 text-custom">
-                    <Icon size={20} />
-                  </div>
-                  <div>
-                    <h3 className="text-base font-bold text-[#151A2A] mb-1.5">
-                      {title}
-                    </h3>
-                    <p className="text-base text-[#64748B]">{description}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Right: FAQ */}
-          {product.faqs?.length > 0 && (
-            <div className="flex-1">
+        <section className="pt-10 lg:pt-12 border-t border-gray-200">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 xl:gap-20 items-start">
+            {/* Left: Why Choose */}
+            <div>
               <h2 className="text-xl font-semibold text-[#151A2A] mb-6">
-                Frequently Asked Questions
+                Why Choose Zephyr Technology?
               </h2>
+              <div className="space-y-6">
+                {WHY_CHOOSE_ITEMS.map(({ title, description, icon: Icon }) => (
+                  <div key={title} className="flex items-start gap-4">
+                    <div className="w-10 h-10 rounded-full bg-[#e8f6f8] flex items-center justify-center shrink-0 text-custom">
+                      <Icon size={20} />
+                    </div>
+                    <div>
+                      <h3 className="text-base font-bold text-[#151A2A] mb-1.5">
+                        {title}
+                      </h3>
+                      <p className="text-base text-[#64748B]">{description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Right: Contact CTA + FAQ */}
+            {product.faqs?.length > 0 && (
+              <div className="lg:sticky lg:top-8">
+                <div className="rounded-xl border border-gray-200 bg-linear-to-br from-[#F8FAFC] to-white p-6 lg:p-8 mb-8">
+                  <h2 className="text-xl font-semibold text-[#151A2A] mb-2">
+                    Need More Information?
+                  </h2>
+                  <p className="text-sm lg:text-base text-[#64748B] leading-relaxed mb-5">
+                    Can&apos;t find the answer you&apos;re looking for? Contact our team
+                    and we&apos;ll be happy to help.
+                  </p>
+                  <Link
+                    to="/contact"
+                    className="inline-flex items-center rounded-lg bg-linear-to-b from-[#00B8DB] to-custom px-6 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:brightness-110"
+                  >
+                    Contact Us
+                  </Link>
+                </div>
+
+                <h2 className="text-xl lg:text-2xl font-semibold text-[#151A2A] mb-5 lg:mb-6">
+                  Frequently Asked Questions
+                </h2>
               <div className="space-y-3">
-                {product.faqs.map((faq, idx) => (
+                {product.faqs.map((faq, idx) => {
+                  const isOpen = activeFaq === idx;
+                  const faqMotion = prefersReducedMotion
+                    ? { duration: 0 }
+                    : FAQ_TRANSITION;
+
+                  return (
                   <div
                     key={faq.id}
                     className="border border-gray-200 rounded-lg overflow-hidden bg-white"
                   >
                     <button
-                      onClick={() => setActiveFaq(activeFaq === idx ? null : idx)}
+                      type="button"
+                      onClick={() => setActiveFaq(isOpen ? null : idx)}
+                      aria-expanded={isOpen}
                       className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors"
                     >
                       <span className="text-base font-medium text-[#151A2A] pr-4">
                         {faq.question}
                       </span>
-                      {activeFaq === idx ? (
-                        <FiChevronUp className="text-gray-400 shrink-0" />
-                      ) : (
-                        <FiChevronDown className="text-gray-400 shrink-0" />
-                      )}
+                      <motion.span
+                        animate={{ rotate: isOpen ? 180 : 0 }}
+                        transition={faqMotion}
+                        className="text-gray-400 shrink-0 inline-flex"
+                      >
+                        <FiChevronDown size={18} />
+                      </motion.span>
                     </button>
-                    {activeFaq === idx && (
-                      <div className="p-4 pt-0 text-base text-[#64748B] leading-relaxed border-t border-gray-100 whitespace-pre-line">
-                        {faq.answer}
-                      </div>
-                    )}
+                    <AnimatePresence initial={false}>
+                      {isOpen && (
+                        <motion.div
+                          key="content"
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={faqMotion}
+                          className="overflow-hidden"
+                        >
+                          <div className="p-4 pt-0 text-base text-[#64748B] leading-relaxed border-t border-gray-100 whitespace-pre-line">
+                            {faq.answer}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
-                ))}
+                  );
+                })}
               </div>
-            </div>
-          )}
-        </div>
+              </div>
+            )}
+          </div>
+        </section>
 
         {/* ── RELATED PRODUCTS ── */}
         {product.relatedProducts?.length > 0 && (

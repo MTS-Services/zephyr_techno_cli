@@ -18,9 +18,8 @@ const Footer = () => {
               Premium mobile technology solutions. From flagship new devices to certified refurbished phones.
             </p> */}
             <p className="text-base text-[#6A6A6A] font-normal">
-              Zephyr Technology is an independent retailer and is not affiliated
-              with, authorised by, sponsored by, or endorsed by Apple Inc. or
-              any other manufacturer unless explicitly stated.
+              Zephyr Technology Is An Independent UK Retailer. Apple@ Is A Trademark Of Apple Inc. We Are Not
+              Affiliated With Apple Unless Explicitly Stated.
             </p>
             <div className="flex gap-3 mt-4">
               <a
