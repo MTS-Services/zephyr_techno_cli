@@ -105,9 +105,10 @@ const Navbar = () => {
             </Link>
             <Link
               to="/sell"
-              className="btn-custom border-none text-sm font-medium px-4 hidden sm:flex"
+              className="btn-custom border-none text-sm font-medium px-3 sm:px-4 flex"
             >
-              Sell Your Phone
+              <span className="sm:hidden">Sell Your Phone</span>
+              <span className="hidden sm:inline">Sell Your Phone</span>
             </Link>
             {isAuthenticated ? (
               <div
@@ -162,7 +163,7 @@ const Navbar = () => {
             ) : (
               <Link
                 to="/login"
-                className="btn bg-[#2E395B] hover:bg-[#1C253B] text-white border-none text-sm font-medium px-4"
+                className="btn bg-[#2E395B] hover:bg-[#1C253B] text-white border-none text-sm font-medium px-4 hidden sm:flex"
               >
                 Log In
               </Link>
