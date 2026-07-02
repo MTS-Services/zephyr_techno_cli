@@ -35,6 +35,7 @@ import AboutDevice from "../pages/public/aboutdevice/AboutDevice";
 import FinalizeSale from "../pages/public/finalizeSale/FinalizeSale";
 import Checkout from "../pages/public/checkout/Checkout";
 import CheckoutSuccess from "../pages/public/checkout/CheckoutSuccess";
+import CheckoutCancel from "../pages/public/checkout/CheckoutCancel";
 import BusinessQuery from "../pages/admin/businessQuery/BusinessQuery";
 import ContactManagement from "../pages/admin/contactManagement/ContactManagement";
 import ForgetCode from "../pages/auth/ForgetCode";
@@ -75,6 +76,10 @@ const router = createBrowserRouter([
       {
         path: "checkout/success",
         element: <CheckoutSuccess />,
+      },
+      {
+        path: "checkout/cancel",
+        element: <CheckoutCancel />,
       },
       {
         path: "contact",
